@@ -5,12 +5,10 @@ pipeline {
         jdk 'JDK 17'
     }
     environment {
-        JAVA_HOME="${tool 'JDK 17'}"
-        
         // App Settings
         project_name="demoApp-Jenkins" //DTP Project
         app_name="demoApp-baseline" //docker container
-        image="parasoft/demoApp:baseline" //docker image
+        image="parasoft/demo-app:baseline" //docker image
         app_short="DA" //demoApp
         app_port=8090
         app_cov_port=8050
@@ -20,8 +18,6 @@ pipeline {
         // Jenkins UID:GID
         jenkins_uid=992
         jenkins_gid=992
-
-        nvd_key="${NVD_APIKEY}" //nvd api key to speed up owasp dependency check
 
         // Parasoft Licenses
         ls_url="${PARASOFT_LS_URL}" //https\://dtp:8443
@@ -36,16 +32,14 @@ pipeline {
         buildId="${app_short}-${BUILD_TIMESTAMP}"
         
         // Parasoft Jtest Settings
-        jtestCWEConfig="builtin://CWE Top 25 2023"
-        jtestOWASPConfig="builtin://OWASP Top 10-2021"
-        jtestPCIConfig="builtin://PCI DSS 4.0"
-        jtestSTIGConfig="builtin://DISA-ASD-STIG"
-        jtestCERTConfig="builtin://CERT for Java"
-        jtestSessionTag="demoAppJenkins-Jtest-Security"
+        jtestSAConfig="jtest.builtin://Recommended Rules"
+        jtestMAConfig="jtest.builtin://Metrics"
+        jtestSessionTag="demoAppJenkins-Jtest"
+        unitCovImage="demoApp_All;demoApp_UnitTest"
 
         // Parasoft SOAtest Settings
         soatestConfig="soatest.user://Example Configuration"
-        soatestSessionTag="demoAppJenkins-SOAtest-Security"
+        soatestSessionTag="demoAppJenkins-SOAtest"
         soatestCovImage="demoApp_All;demoApp_SOAtest"
     }
     stages {
@@ -66,34 +60,10 @@ pipeline {
                     #pwd
                     #ls -ll
                     '''
-                
-                // setup OWASP Dependency Check installation (painful distribution)
-                sh '''
-                    # Prepare owasp dependency check pack for jtest docker build
-                    cd demoApp-jenkins/jtest;
-                    mkdir dependency-check-pack-2024.1.0;
-                    unzip -q ./dependency-check-pack-2024.1.0.zip -d ./dependency-check-pack-2024.1.0;
-                    ls -ll;
-                    ls -la ./dependency-check-pack-2024.1.0;
-
-                    # Set Up and write .properties file 
-                    echo $"
-                    parasoft.eula.accepted=true
-                    dtp.url=${dtp_url}
-                    dtp.user=${dtp_user}
-                    dtp.password=${dtp_pass}
-                    dtp.project=${project_name}
-                    build.id=${buildId}
-                    session.tag=${jtestSessionTag}
-                    report.dtp.publish=${dtp_publish}
-                    " > ./dependency-check-pack-2024.1.0/settings.properties
-                    '''
 
                 // Prepare the jtestcli.properties file
                 sh '''
                     # Set Up and write .properties file
-                    cd demoApp-jenkins/jtest
-                    pwd
                     echo $"
                     parasoft.eula.accepted=true
                     jtest.license.use_network=true
@@ -121,9 +91,9 @@ pipeline {
                     dtp.url=${dtp_url}
                     dtp.user=${dtp_user}
                     dtp.password=${dtp_pass}
-                    dtp.project=${project_name}" > ./jtestcli.properties
+                    dtp.project=${project_name}" > ./demoApp-jenkins/jtest/jtestcli.properties
                     '''
-                
+
                 // Setup soatestcli.properties file
                 sh  '''
                     # Set Up and write .properties file
@@ -167,168 +137,7 @@ pipeline {
                     '''
             }
         }
-        stage('Jtest: (SAST) CWE Top 25') {
-            when { equals expected: true, actual: false }
-            steps {
-                // Execute the build with Jtest Maven plugin in docker
-                sh '''
-                    # Run Maven build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    mvn compile \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestCWEConfig}' \
-                    -Djtest.report=./target/jtest/sast/cwe \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    "
-                    '''
-            }
-        }
-        stage('Jtest: (SAST) OWASP Top 10') {
-            when { equals expected: true, actual: false }
-            steps {
-                // Execute the build with Jtest Maven plugin in docker
-                sh '''
-                    # Run Maven build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestOWASPConfig}' \
-                    -Djtest.report=./target/jtest/sast/owasp \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    "
-                    '''
-            }
-        }
-        stage('Jtest: (SAST) PCI-DSS') {
-            when { equals expected: true, actual: false }
-            steps {
-                // Execute the build with Jtest Maven plugin in docker
-                sh '''
-                    # Run Maven build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestPCIConfig}' \
-                    -Djtest.report=./target/jtest/sast/pci \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    "
-                    '''
-            }
-        }
-        stage('Jtest: (SAST) DISA ASD-STIG') {
-            when { equals expected: true, actual: false }
-            steps {
-                // Execute the build with Jtest Maven plugin in docker
-                sh '''
-                    # Run Maven build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestSTIGConfig}' \
-                    -Djtest.report=./target/jtest/sast/stig \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    "
-                    '''
-            }
-        }
-        stage('Jtest: (SAST) CERT for Java') {
-            when { equals expected: true, actual: false }
-            steps {
-                // Execute the build with Jtest Maven plugin in docker
-                sh '''
-                    # Run Maven build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestCERTConfig}' \
-                    -Djtest.report=./target/jtest/sast/cert \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    "
-                    '''
-                echo '---> Parsing 10.x static analysis reports'
-                recordIssues(
-                    tools: [parasoftFindings(
-                        localSettingsPath: '$PWD/demoApp-jenkins/jtest/jtestcli.properties',
-                        pattern: '**/target/jtest/sast/*/*.xml'
-                    )],
-                    unhealthy: 100, // Adjust as needed
-                    healthy: 50,   // Adjust as needed
-                    minimumSeverity: 'HIGH', // Adjust as needed
-                    // qualityGates: [[
-                    //     threshold: 10,
-                    //     type: 'TOTAL_ERROR',
-                    //     unstable: true
-                    // ]],
-                    skipPublishingChecks: true // Adjust as needed
-                )
-            }
-        }
-        stage('Parasoft: (SCA) OWASP Dependency Check') {
+        stage('Jtest: Quality Scan') {
             when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
@@ -344,31 +153,58 @@ pipeline {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn \
+                    # Compile the project and run Jtest Static Analysis
+                    mvn compile \
+                    jtest:jtest \
+                    -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
-                    -P owasp-dependency-check org.owasp:dependency-check-maven:10.0.2:check \
-                    -Dodc.outputDirectory=./target/owasp-dependency-check \
-                    -DnvdApiKey=${nvd_key} \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='${jtestSAConfig}' \
+                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+
+                    # Compile the project and run Jtest Metrics Analysis
+                    mvn \
+                    jtest:jtest \
+                    -DskipTests=true \
+                    -s /home/parasoft/.m2/settings.xml \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='${jtestMAConfig}' \
+                    -Djtest.report=./target/jtest/ma \
+                    -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
-                // Run Parasoft OWASP Dependency Check Pack directly on VM
-                sh '''
-                    ./demoApp-jenkins/jtest/dependency-check-pack-2024.1.0/dependencycheck.sh \
-                        -results.file ./demoApp/target/dependency-check-report.xml
-                    '''
+                echo '---> Parsing 10.x static analysis reports'
+                recordIssues(
+                    tools: [parasoftFindings(
+                        localSettingsPath: '$PWD/demoApp-jenkins/jtest/jtestcli.properties',
+                        pattern: '**/target/jtest/*/*.xml'
+                    )],
+                    unhealthy: 100, // Adjust as needed
+                    healthy: 50,   // Adjust as needed
+                    minimumSeverity: 'HIGH', // Adjust as needed
+                    // qualityGates: [[
+                    //     threshold: 10,
+                    //     type: 'TOTAL_ERROR',
+                    //     unstable: true
+                    // ]],
+                    skipPublishingChecks: true // Adjust as needed
+                )
             }
         }
-        stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: false }
+        stage('Jtest: Unit Test') {
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
                     # Set Up and write .properties file
                     echo $"
-                    report.coverage.images=${soatestCovImage}
-                    " > ./demoApp-jenkins/jtest/jtestcli-ft.properties
+                    report.coverage.images=${unitCovImage}
+                    " > ./demoApp-jenkins/jtest/jtestcli-ut.properties
                 '''
-                // Package the application with the Jtest Monitor
+                // Execute the build with Jtest Maven plugin in docker
                 sh '''
                     # Run Maven build with Jtest tasks via Docker
                     docker run \
@@ -380,17 +216,71 @@ pipeline {
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-                    
+
+                    # Compile the test sources and run unit tests with Jtest
+                    mvn test-compile \
+                    jtest:agent \
+                    test \
+                    jtest:jtest \
+                    -s /home/parasoft/.m2/settings.xml \
+                    -Dmaven.test.failure.ignore=true \
+                    -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
+                    -Djtest.config='builtin://Unit Tests' \
+                    -Djtest.report=./target/jtest/ut \
+                    -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    "
+                    '''
+                echo '---> Parsing 10.x unit test reports'
+                script {
+                    step([$class: 'XUnitPublisher', 
+                        // thresholds: [failed(
+                        //     failureNewThreshold: '0', 
+                        //     failureThreshold: '0')
+                        // ],
+                        tools: [[$class: 'ParasoftType', 
+                            deleteOutputFiles: true, 
+                            failIfNotNew: false, 
+                            pattern: '**/target/jtest/ut/*.xml', 
+                            skipNoTestFiles: true, 
+                            stopProcessingIfError: false
+                        ]]
+                    ])
+                }
+            }
+        }
+        stage('Jtest: Package-CodeCoverage') {
+            when { equals expected: true, actual: true }
+            steps {
+                // Setup stage-specific additional settings
+                sh '''
+                    # Set Up and write .properties file
+                    echo $"
+                    report.coverage.images=${soatestCovImage}
+                    " > ./demoApp-jenkins/jtest/jtestcli-ft.properties
+                '''
+                // Execute the build with Jtest Maven plugin in docker
+                sh '''
+                    # Run Maven build with Jtest tasks via Docker
+                    docker run \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    --rm -i \
+                    --name jtest \
+                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -w "/home/parasoft/jenkins/demoApp" \
+                    --network=demo-net \
+                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                    # Package the application with the Jtest Monitor
                     mvn package jtest:monitor \
                     -s /home/parasoft/.m2/settings.xml \
                     -Dmaven.test.skip=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ft.properties' \
                     -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
-                    '''
-                
-                // Unzip the monitor package in preparation for mounting with deployment
-                sh '''
+
                     # check demoApp/target permissions
                     #ls -la ./demoApp/target
 
@@ -403,7 +293,7 @@ pipeline {
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // deploy the project
                 sh  '''
@@ -428,9 +318,9 @@ pipeline {
                     curl -iv --raw http://localhost:${app_cov_port}/status
                     '''
             }
-        }
-        stage('SOAtest: (DAST) UI-API Tests') {
-            when { equals expected: true, actual: false }
+        }       
+        stage('SOAtest: Functional Test') {
+            when { equals expected: true, actual: true }
             steps {
                 // Run SOAtestCLI from docker
                 sh  '''
@@ -456,12 +346,15 @@ pipeline {
                     
                     # Execute the project with SOAtest CLI
                     ./soavirt/soatestcli \
+                    -J-Dcom.parasoft.browser.BrowserPropertyOptions.CHROME_ARGUMENTS=headless,disable-gpu,no-sandbox,disable-dev-shm-usage \
+                    -J-Dwebtool.browsercontroller.webdriver.thirdparty.GeneralOptions.MAN_IN_THE_MIDDLE_ENABLED=false \
                     -data ./soavirt_workspace \
-                    -resource /demoApp-jenkins/soatest/SOAtestProject/security \
-                    -environment 'demoApp-baseline (docker)' \
+                    -resource /demoApp-jenkins/soatest/SOAtestProject/functional \
                     -config '${soatestConfig}' \
                     -settings ./soavirt_workspace/demoApp-jenkins/soatest/soatestcli.properties \
-                    -report ./demoApp-jenkins/soatest/report \
+                    -environment 'demoApp-baseline (docker)' \
+                    -property application.coverage.runtime.dir=/usr/local/parasoft/soavirt_workspace/SOAtestProject/coverage_runtime_dir \
+                    -report ./demoApp-jenkins/soatest/func-report \
                     "
                     '''
                 echo '---> Parsing 9.x soatest reports'
@@ -476,7 +369,7 @@ pipeline {
                         tools: [[$class: 'ParasoftSOAtest9xType', 
                             deleteOutputFiles: true, 
                             failIfNotNew: false, 
-                            pattern: '**/soatest/report/*.xml', 
+                            pattern: '**/soatest/func-report/*.xml', 
                             skipNoTestFiles: true, 
                             stopProcessingIfError: false
                         ]]
@@ -484,14 +377,48 @@ pipeline {
                 }
             }
         }
+        stage('Selenic: Java Selenium Test') {
+            when { equals expected: true, actual: true }
+            steps {
+                // Run Selenic from docker
+                sh  '''
+                    #TODO
+                    '''
+            }
+        }
+        stage('SOAtest: Shift-Left Load Test') {
+            when { equals expected: true, actual: true }
+            steps {
+                // Run Load Test CLI from docker
+                sh  '''
+                   docker run \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    --rm -i \
+                    --name loadtest \
+                    -e ACCEPT_EULA=true \
+                    -v "$PWD/demoApp-jenkins:/usr/local/parasoft/demoApp-jenkins" \
+                    -w "/usr/local/parasoft" \
+                    --network=demo-net \
+                    $(docker build -q ./demoApp-jenkins/soatest) /bin/bash -c " \
+               
+                    # Execute the project with SOAtest CLI
+                    ./soavirt/loadtest \
+                    -cmd \
+                    -run ./demoApp-jenkins/soatest/SOAtestProject/loadtest/script.txt \
+                    -licenseServer ${ls_url} \
+                    -licenseUsername ${ls_user} \
+                    -licensePassword ${ls_pass} \
+                    -licenseVus 1000 \
+                    "
+                    '''
+            }
+        }
         stage('Release') {
             steps {
                 // Release the project
                 sh  '''
-                        
                 # Clean up
-                docker container stop ${app_name}
-                    
+                
                 '''
             }
         }
@@ -506,10 +433,11 @@ pipeline {
 
             archiveArtifacts(artifacts: '''
                     **/target/**/*.war, 
-                    **/target/jtest/sast/**, 
-                    **/target/dependency-check-report.*, 
+                    **/target/jtest/sa/**, 
+                    **/target/jtest/ut/**, 
                     **/target/jtest/monitor/**, 
-                    **/soatest/report/**''',
+                    **/soatest/func-report/**, 
+                    **/soatest/load-report/**''',
                 fingerprint: true, 
                 onlyIfSuccessful: true,
                 excludes: '''
