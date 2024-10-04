@@ -57,8 +57,8 @@ pipeline {
                     git clone https://github.com/parasoft/parasoft-demo-app demoApp
 
                     # Debugging
-                    #pwd
-                    #ls -ll
+                    pwd
+                    ls -ll
                     '''
 
                 // Prepare the jtestcli.properties file
