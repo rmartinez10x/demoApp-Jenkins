@@ -59,9 +59,6 @@ pipeline {
                     # Debugging
                     pwd
                     ls -ll
-                    mkdir -p /home/parasoft/jenkins/demoApp/.gradle/6.4.1/fileHashes
-
-
                     '''
 
                 // Prepare the jtestcli.properties file
@@ -156,7 +153,7 @@ pipeline {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-
+                    ls -ld /home/parasoft/jenkins/demoApp \
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
