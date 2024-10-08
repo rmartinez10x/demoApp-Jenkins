@@ -59,6 +59,9 @@ pipeline {
                     # Debugging
                     pwd
                     ls -ll
+                    mkdir -p /home/parasoft/jenkins/demoApp/.gradle/6.4.1/fileHashes
+
+
                     '''
 
                 // Prepare the jtestcli.properties file
