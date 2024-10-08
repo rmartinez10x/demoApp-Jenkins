@@ -153,27 +153,7 @@ pipeline {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    # Compile the project and run Jtest Static Analysis
-                    /* mvn compile \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestSAConfig}' \
-                    -Djtest.report=./target/jtest/sa \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \ */
 
-                    # Compile the project and run Jtest Metrics Analysis
-                    /* mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestMAConfig}' \
-                    -Djtest.report=./target/jtest/ma \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \ */
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
