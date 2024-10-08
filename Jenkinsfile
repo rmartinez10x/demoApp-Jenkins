@@ -162,7 +162,9 @@ pipeline {
                     -Djtest.config='${jtestSAConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
+                    --stacktrace \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    
 
                     "
                     '''
