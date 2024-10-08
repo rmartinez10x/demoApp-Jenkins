@@ -154,7 +154,7 @@ pipeline {
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     # Compile the project and run Jtest Static Analysis
-                    mvn compile \
+                    /* mvn compile \
                     jtest:jtest \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
@@ -162,10 +162,10 @@ pipeline {
                     -Djtest.config='${jtestSAConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \ */
 
                     # Compile the project and run Jtest Metrics Analysis
-                    mvn \
+                    /* mvn \
                     jtest:jtest \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
@@ -173,7 +173,17 @@ pipeline {
                     -Djtest.config='${jtestMAConfig}' \
                     -Djtest.report=./target/jtest/ma \
                     -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \ */
+
+                    ./gradlew clean assemble jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    -DskipTests=true \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='${jtestSAConfig}' \
+                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.showSettings=true \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
+
                     "
                     '''
                 echo '---> Parsing 10.x static analysis reports'
