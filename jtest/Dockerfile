@@ -51,7 +51,7 @@ COPY jtestcli.properties /home/parasoft/jtestcli.properties
 COPY .m2 /home/parasoft/.m2
 
 ## Fix permissions
-RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
+#RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
 
 ## Switch user back and configure MVN
 USER parasoft
