@@ -23,20 +23,28 @@ RUN update-alternatives --install /usr/bin/java java /${USER_HOME_DIR}/${JDK_VER
 
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# Install MVN
-## Set MVN args
-ARG MAVEN_VERSION=3.9.5
-ENV MAVEN_HOME=${USER_HOME_DIR}/apache-maven-${MAVEN_VERSION}
-ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
-RUN mkdir -p ${MAVEN_HOME} \
- && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
- && tar -xzf /tmp/apache-maven.tar.gz -C ${MAVEN_HOME} --strip-components=1 \
- && rm -f /tmp/apache-maven.tar.gz \
- && ln -s ${MAVEN_HOME}/bin/mvn /usr/bin/mvn \
- && groupmod -g ${HOST_GID} parasoft \
- && usermod -u ${HOST_UID} -g ${HOST_GID} parasoft
+# Install Gradle
+ARG GRADLE_VERSION="7.6.4"
+# install git-lfs and unzip commands
+# be sure to use the 'root' user to install new packages
+RUN yum -y install git-lfs && yum -y install unzip
 
-ENV PATH="${MAVEN_HOME}/bin:${PATH}"
+# install gradle
+WORKDIR /opt
+RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip && \
+    unzip gradle-${GRADLE_VERSION}-bin.zip && \
+    rm -f gradle-${GRADLE_VERSION}-bin.zip
+
+# integrate Jtest with lombok 
+WORKDIR /opt/parasoft/jtest/integration/lombok
+RUN java -jar jtest-integration-lombok.jar
+
+# pre-configure parasoft user environment together with Jtest by copying jtestcli.properties into the $HOME directory 
+# be sure to restore default 'parasoft' user    
+USER parasoft:parasoft
+WORKDIR /home/parasoft
+ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
+COPY jtestcli.properties /home/parasoft/
 
 ## Copy Deps
 COPY jtestcli.properties /home/parasoft/jtestcli.properties
