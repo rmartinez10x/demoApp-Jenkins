@@ -164,7 +164,6 @@ pipeline {
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-                    #$(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     pwd; \
                     ls -ld .; \
