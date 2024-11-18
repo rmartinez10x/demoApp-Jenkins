@@ -158,7 +158,8 @@ pipeline {
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
                     #$(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    ls -ld /home/parasoft/jenkins/demoApp \
+                    pwd; \
+                    ls -ld .; \
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
