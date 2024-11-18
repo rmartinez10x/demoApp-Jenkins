@@ -16,8 +16,8 @@ pipeline {
         app_jms_port=63616
 
         // Jenkins UID:GID
-        jenkins_uid=992
-        jenkins_gid=992
+        //jenkins_uid=992
+        //jenkins_gid=992
 
         // Parasoft Licenses
         ls_url="${PARASOFT_LS_URL}" //https\://dtp:8443
@@ -46,7 +46,15 @@ pipeline {
         stage('Setup') {
             steps {
                 deleteDir()
-                                
+
+                // setup additional environment
+                script {
+                    env.jenkins_uid = sh(script: 'id -u jenkins', returnStdout: true).trim()
+                    env.jenkins_gid = sh(script: 'id -g jenkins', returnStdout: true).trim()
+                    env.buildTimestamp = sh(script: 'date +%Y%m%d', returnStdout: true).trim()
+                    env.buildId = "${app_short}-${buildTimestamp}"
+                }
+                         
                 // setup the workspace
                 sh  '''
                     # Clone this repository & demoApp repository into the workspace
