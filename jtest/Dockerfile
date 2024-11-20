@@ -36,7 +36,7 @@ RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.
     rm -f gradle-${GRADLE_VERSION}-bin.zip
 
 # integrate Jtest with lombok 
-WORKDIR /opt/parasoft/jtest/integration/lombok
+WORKDIR /home/parasoft/jtest/integration/lombok
 RUN java -jar jtest-integration-lombok.jar
 
 # pre-configure parasoft user environment together with Jtest by copying jtestcli.properties into the $HOME directory 
@@ -55,12 +55,8 @@ COPY .m2 /home/parasoft/.m2
 
 ## Switch user back and configure MVN
 USER parasoft
-ENV MAVEN_CONFIG "${USER_HOME_DIR}/.m2"
 
 # Define working directory.
 WORKDIR ${USER_HOME_DIR}
 
 # Define commonly used JAVA_HOME variables
-
-# Define default command.
-CMD ["mvn", "--version"]
