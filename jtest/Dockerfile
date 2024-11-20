@@ -37,7 +37,7 @@ RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.
 
 # integrate Jtest with lombok 
 WORKDIR /home/parasoft/jtest/integration/lombok
-RUN ls -a
+RUN ls -la
 RUN java -jar jtest-integration-lombok.jar
 
 # pre-configure parasoft user environment together with Jtest by copying jtestcli.properties into the $HOME directory 
