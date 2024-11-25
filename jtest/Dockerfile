@@ -1,8 +1,8 @@
 # baseline image
-FROM parasoft/jtest
+FROM parasoft/jtest:2024.2
 
 ARG HOST_UID=995
-ARG HOST_GID=992
+ARG HOST_GID=991
 
 ## Permissions to create dirs
 USER root
@@ -34,25 +34,20 @@ WORKDIR /opt
 RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip && \
     unzip gradle-${GRADLE_VERSION}-bin.zip && \
     rm -f gradle-${GRADLE_VERSION}-bin.zip
+ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # integrate Jtest with lombok 
 WORKDIR /home/parasoft/jtest/integration/lombok
 RUN ls -la
+RUN java -version
 RUN java -jar jtest-integration-lombok.jar
-
-# pre-configure parasoft user environment together with Jtest by copying jtestcli.properties into the $HOME directory 
-# be sure to restore default 'parasoft' user    
-USER parasoft:parasoft
-WORKDIR /home/parasoft
-ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
-COPY jtestcli.properties /home/parasoft/
 
 ## Copy Deps
 COPY jtestcli.properties /home/parasoft/jtestcli.properties
 COPY .m2 /home/parasoft/.m2
 
 ## Fix permissions
-#RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
+RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
 
 ## Switch user back and configure MVN
 USER parasoft
