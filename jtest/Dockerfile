@@ -37,7 +37,7 @@ RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.
 ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # integrate Jtest with lombok 
-WORKDIR /home/parasoft/jtest/integration/lombok
+WORKDIR /opt/parasoft/jtest/integration/lombok
 RUN ls -la
 RUN java -version
 RUN java -jar jtest-integration-lombok.jar
