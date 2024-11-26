@@ -159,11 +159,11 @@ pipeline {
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
                     --name jtest \
-                    -v "$(PWD)/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$(PWD)/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" --progress=plain ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     pwd; \
                     ls -ld; \
@@ -176,9 +176,7 @@ pipeline {
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    
-
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
                 echo '---> Parsing 10.x static analysis reports'
