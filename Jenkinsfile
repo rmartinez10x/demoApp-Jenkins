@@ -159,8 +159,8 @@ pipeline {
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
                     --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -v "$(PWD)/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$(PWD)/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" --progress=plain ./demoApp-jenkins/jtest) /bin/bash -c " \
