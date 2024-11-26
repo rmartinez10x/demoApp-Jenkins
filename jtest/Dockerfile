@@ -56,3 +56,4 @@ USER parasoft
 WORKDIR ${USER_HOME_DIR}
 
 # Define commonly used JAVA_HOME variables
+CMD ["gradle", "--version"]
