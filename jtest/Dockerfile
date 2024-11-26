@@ -34,7 +34,7 @@ WORKDIR /opt
 RUN wget https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip && \
     unzip gradle-${GRADLE_VERSION}-bin.zip && \
     rm -f gradle-${GRADLE_VERSION}-bin.zip
-ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
+
 
 # integrate Jtest with lombok 
 WORKDIR /opt/parasoft/jtest/integration/lombok
@@ -44,13 +44,14 @@ RUN java -jar jtest-integration-lombok.jar
 
 ## Copy Deps
 COPY jtestcli.properties /home/parasoft/jtestcli.properties
-COPY .m2 /home/parasoft/.m2
 
 ## Fix permissions
 RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
 
 ## Switch user back and configure MVN
-USER parasoft
+USER parasoft:parasoft
+
+ENV PATH="/opt/gradle-${GRADLE_VERSION}/bin:${PATH}"
 
 # Define working directory.
 WORKDIR ${USER_HOME_DIR}

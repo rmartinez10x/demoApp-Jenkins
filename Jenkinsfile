@@ -29,7 +29,7 @@ pipeline {
         dtp_user="${PARASOFT_DTP_USER}" //admin
         dtp_pass="${PARASOFT_DTP_PASS}"
         dtp_publish="${PARASOFT_DTP_PUBLISH}" //false
-        buildId="${app_short}-${BUILD_TIMESTAMP}"
+        //buildId="${app_short}-${BUILD_TIMESTAMP}"
         
         // Parasoft Jtest Settings
         jtestSAConfig="jtest.builtin://Recommended Rules"
@@ -154,6 +154,9 @@ pipeline {
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
+                    docker container prune -f;
+                    docker image prune -f;
+                    
                     # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
