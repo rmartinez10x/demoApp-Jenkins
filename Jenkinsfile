@@ -169,6 +169,21 @@ pipeline {
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     pwd; \
+                    ls -ll;
+                    "
+
+                    # Run Gradle build with Jtest tasks via Docker
+                    docker run \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    --rm -i \
+                    --name jtest \
+                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -w "/home/parasoft/jenkins/demoApp" \
+                    --network=demo-net \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                    pwd; \
                     ls -ld; \
 
                     ./gradlew clean assemble jtest \
