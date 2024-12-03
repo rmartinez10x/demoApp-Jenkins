@@ -221,12 +221,12 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./parabank-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -Djtest.settings='../parabank-jenkins/jtest/jtestcli.properties,../parabank-jenkins/jtest/jtestcli-ut.properties' \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
                     -Djtest.report=./target/jtest/ut \
                     -Djtest.showSettings=true \
