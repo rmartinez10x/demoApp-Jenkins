@@ -212,7 +212,7 @@ pipeline {
                 '''
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -221,30 +221,17 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./parabank-jenkins/jtest) /bin/bash -c " \
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestSAConfig}' \
-                    -Djtest.report=./target/jtest/sa \
-                    -Djtest.showSettings=true \
-                    --stacktrace --debug \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-
-                    # Compile the test sources and run unit tests with Jtest
-                    mvn test-compile \
-                    jtest:agent \
-                    test \
-                    jtest:jtest \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Dmaven.test.failure.ignore=true \
-                    -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
+                    -Djtest.settings='../parabank-jenkins/jtest/jtestcli.properties,../parabank-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
                     -Djtest.report=./target/jtest/ut \
                     -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    --stacktrace --debug \
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
                 echo '---> Parsing 10.x unit test reports'
