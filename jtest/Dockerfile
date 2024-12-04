@@ -43,7 +43,7 @@ RUN java -version
 RUN java -jar jtest-integration-lombok.jar
 
 ## Copy Deps
-COPY jtestcli.properties /home/parasoft/jtestcli.properties
+COPY jtestcli.properties /opt/parasoft/jtestcli.properties
 
 ## Fix permissions
 RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
