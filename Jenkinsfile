@@ -230,7 +230,7 @@ pipeline {
                     -Djtest.config='builtin://Unit Tests' \
                     -Djtest.report=./target/jtest/ut \
                     -Djtest.showSettings=true \
-                    --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true\
+                    --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
                     -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
