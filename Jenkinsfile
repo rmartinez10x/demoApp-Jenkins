@@ -226,11 +226,11 @@ pipeline {
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
+                    -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../parabank-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
                     -Djtest.report=./target/jtest/ut \
                     -Djtest.showSettings=true \
-                    --stacktrace --debug \
+                    --stacktrace \
                     -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
