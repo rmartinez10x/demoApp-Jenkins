@@ -145,7 +145,7 @@ pipeline {
                     '''
                     
                     sh  '''
-                    touch /opt/parasoft/jtest/integration/gradle/init.gradle && \
+                    touch /home/parasoft/jenkins/demoApp-jenkins/jtest/init.gradle && \
 
                     # Set Up and write .properties file
                     echo $"
