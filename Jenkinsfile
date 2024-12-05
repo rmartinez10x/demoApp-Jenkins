@@ -194,7 +194,7 @@ allprojects {
     }
 }
 
-                    " > ./demoApp-jenkins/soatest/init.gradle
+                    " > /home/parasoft/jenkins/demoApp-jenkins/jtest/init.gradle
                     '''
 
 
@@ -279,7 +279,7 @@ allprojects {
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     ./gradlew clean jtest-agent test jtest \
-                    -I '../demoApp-jenkins/jtest/init.gradle' \
+                    -I '/home/parasoft/jenkins/demoApp-jenkins/jtest/init.gradle' \
                     -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
