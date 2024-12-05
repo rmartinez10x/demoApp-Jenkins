@@ -171,14 +171,6 @@ pipeline {
                     pwd; \
                     ls -ld; \
 
-                    echo "
-                    allprojects {
-                        tasks.withType(Test).configureEach {
-                            ignoreFailures = true
-                        }
-                    }
-                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle
-
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
@@ -230,6 +222,14 @@ pipeline {
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                    echo "
+                    allprojects {
+                        tasks.withType(Test).configureEach {
+                            ignoreFailures = true
+                        }
+                    }
+                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle
 
                     ./gradlew clean jtest-agent test jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
