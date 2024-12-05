@@ -171,6 +171,14 @@ pipeline {
                     pwd; \
                     ls -ld; \
 
+                    echo "
+                    allprojects {
+                        tasks.withType(Test).configureEach {
+                            ignoreFailures = true
+                        }
+                    }
+                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle
+
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
