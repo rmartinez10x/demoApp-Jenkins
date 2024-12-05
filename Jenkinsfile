@@ -143,8 +143,10 @@ pipeline {
                     scontrol.rep1.type=git
                     " > ./demoApp-jenkins/soatest/soatestcli.properties
                     '''
-
+                    
                     sh  '''
+                    touch /opt/parasoft/jtest/integration/gradle/init.gradle && \
+
                     # Set Up and write .properties file
                     echo $"
                     initscript {
