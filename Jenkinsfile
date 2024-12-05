@@ -223,13 +223,13 @@ pipeline {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    echo "
+                    cat <<EOL >> /opt/parasoft/jtest/integration/gradle/init.gradle
                     allprojects {
                         tasks.withType(Test).configureEach {
-                            ignoreFailures = true
-                        }
+                        ignoreFailures = true
+                         }
                     }
-                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    EOL
 
                     ./gradlew clean jtest-agent test jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
