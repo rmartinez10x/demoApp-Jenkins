@@ -280,6 +280,7 @@ allprojects {
 
                     ./gradlew clean jtest-agent test jtest \
                     -I '../demoApp-jenkins/jtest/init.gradle' \
+                    -Djtest.home=/opt/parasoft/jtest \
                     -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
