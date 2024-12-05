@@ -229,7 +229,7 @@ pipeline {
                             ignoreFailures = true
                         }
                     }
-                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle
+                    " >> /opt/parasoft/jtest/integration/gradle/init.gradle \
 
                     ./gradlew clean jtest-agent test jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
