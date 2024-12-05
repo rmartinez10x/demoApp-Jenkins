@@ -143,6 +143,61 @@ pipeline {
                     scontrol.rep1.type=git
                     " > ./demoApp-jenkins/soatest/soatestcli.properties
                     '''
+
+                    sh  '''
+                    # Set Up and write .properties file
+                    echo $"
+                    initscript {
+    def home = System.properties['jtest.home']
+    if (home == null) {
+        println 'No jtest.home system property.'
+        home = System.getenv('JTEST_HOME')
+        if (home == null) {
+            println 'No JTEST_HOME environment variable.'
+            def scriptPath = buildscript.sourceFile.absolutePath
+            def scriptRelativePath = File.separator + 'integration' + File.separator + 'gradle' + File.separator + 'init.gradle'
+            if (scriptPath.contains(scriptRelativePath)) {
+                home = scriptPath.substring(0, scriptPath.indexOf(scriptRelativePath))
+                println 'Setting up system property jtest.home=' + home
+                System.setProperty('jtest.home', home)
+            } else {
+                println 'FAILED to locate Jtest installation directory'
+                println 'Define "jtest.home" system property, "JTEST_HOME" environment variable, '
+                println 'or use initscript PATH/TO/JTEST/integration/gradle/init.gradle.'
+            }
+        } else {
+            println 'Using environment property JTEST_HOME=' + home
+            System.setProperty('jtest.home', home)
+        }
+    } else {
+        println 'Using system property jtest.home=' + home
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url file(home + '/integration/maven')
+        }
+    }
+    dependencies {
+        classpath 'com.parasoft.jtest:jtest-gradle-plugin:2024.2.0'
+        classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2024.2.0'
+    }
+}
+rootProject {
+    apply plugin: com.parasoft.jtest.plugin.gradle.JtestPlugin
+}
+
+allprojects {
+    apply plugin: com.parasoft.jtest.tia.ci.gradle.TIAPlugin
+    tasks.withType(Test).configureEach {
+        ignoreFailures = true
+    }
+}
+
+                    " > ./demoApp-jenkins/soatest/init.gradle
+                    '''
+
+
             }
         }
         stage('Jtest: Quality Scan') {
@@ -223,19 +278,8 @@ pipeline {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    chmod 666 /opt/parasoft/jtest/integration/gradle/init.gradle; \
-
-                    cat <<EOL >> /opt/parasoft/jtest/integration/gradle/init.gradle
-allprojects {
-    tasks.withType(Test).configureEach {
-        ignoreFailures = true
-    }
-}
-EOL
-
-
                     ./gradlew clean jtest-agent test jtest \
-                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    -I '../demoApp-jenkins/jtest/init.gradle' \
                     -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ut.properties' \
                     -Djtest.config='builtin://Unit Tests' \
