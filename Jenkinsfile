@@ -302,7 +302,7 @@ allprojects {
                         tools: [[$class: 'ParasoftType', 
                             deleteOutputFiles: true, 
                             failIfNotNew: false, 
-                            pattern: '**/target/jtest/ut/*.xml', 
+                            pattern: '**/target/jtest/ut/report.xml', 
                             skipNoTestFiles: true, 
                             stopProcessingIfError: false
                         ]]
@@ -322,7 +322,7 @@ allprojects {
                 '''
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -333,13 +333,16 @@ allprojects {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    # Package the application with the Jtest Monitor
-                    mvn package jtest:monitor \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Dmaven.test.skip=true \
+                    #Gradle execution
+                    ./gradlew clean jtest-agent test jtest \
+                    -I '../demoApp-jenkins/jtest/init.gradle' \
+                    -Djtest.home=/opt/parasoft/jtest \
+                    -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ft.properties' \
+                    -Djtest.config='builtin://Unit Tests' \
                     -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
 
                     # check demoApp/target permissions
