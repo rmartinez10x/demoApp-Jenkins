@@ -287,7 +287,10 @@ allprojects {
                     -Djtest.report=./target/jtest/ut \
                     -Djtest.showSettings=true \
                     --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish};
+                    -Dproperty.report.dtp.publish=${dtp_publish};\
+
+                    #Archive all documents for review
+                    archiveArtifacts artifacts: '**/target/jtest/ut/*.xml'
                     "
                     '''
                 echo '---> Parsing 10.x unit test reports'
