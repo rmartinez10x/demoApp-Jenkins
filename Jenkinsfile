@@ -334,12 +334,11 @@ allprojects {
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     #Gradle execution
-                    ./gradlew clean jtest-agent test jtest \
+                    ./gradlew jtest-monitor \
                     -I '../demoApp-jenkins/jtest/init.gradle' \
                     -Djtest.home=/opt/parasoft/jtest \
                     -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ft.properties' \
-                    -Djtest.config='builtin://Unit Tests' \
                     -Djtest.showSettings=true \
                     --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
                     -Dproperty.report.dtp.publish=${dtp_publish};
