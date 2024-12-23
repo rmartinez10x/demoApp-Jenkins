@@ -372,12 +372,12 @@ allprojects {
                     -v "$PWD/monitor:/home/docker/jtest/monitor" \
                     --network=demo-net \
                     --name ${app_name} \
-                    $(docker build -q ./demoApp-jenkins/demoApp-docker)
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/demoApp-docker)
 
                     # Health Check
                     sleep 15
                     docker ps -f name=${app_name}
-                    curl -iv --raw http://localhost:${app_port}/demoApp
+                    curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
                     '''
             }
