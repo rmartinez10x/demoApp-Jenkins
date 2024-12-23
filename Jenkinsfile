@@ -344,12 +344,12 @@ allprojects {
                     -Dproperty.report.dtp.publish=${dtp_publish};
                     "
 
-                    # check demoApp/target permissions
-                    #ls -la ./demoApp/target
+                    # check demoApp/build permissions
+                    #ls -la ./demoApp/build
 
                     # Unzip monitor.zip
                     mkdir monitor
-                    unzip -q ./demoApp/target/jtest/monitor/monitor.zip -d .
+                    unzip -q ./demoApp/build/jtest/monitor.zip -d .
                     #ls -ll
                     #ls -la monitor
                     '''
