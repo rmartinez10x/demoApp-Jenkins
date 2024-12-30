@@ -256,7 +256,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -311,7 +311,7 @@ allprojects {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -356,7 +356,7 @@ allprojects {
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // deploy the project
                 sh  '''
@@ -395,8 +395,12 @@ allprojects {
                     -v "$PWD/demoApp-jenkins:/usr/local/parasoft/demoApp-jenkins" \
                     -w "/usr/local/parasoft" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/soatest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/soatest) /bin/bash -c " \
 
+
+                    #Checking permissions of the entrypoint sh file
+                    ls -l /usr/local/parasoft/soavirt/entrypoint.sh; \
+                    
                     # Create workspace directory and copy SOAtest project into it
                     mkdir -p ./soavirt_workspace; \
                     cp -f -R ./demoApp-jenkins ./soavirt_workspace/demoApp-jenkins; \

@@ -1,5 +1,5 @@
 # baseline image
-FROM parasoft/soavirt
+FROM parasoft/soavirt:2024.2
 
 ARG HOST_UID=992
 ARG HOST_GID=992
@@ -16,6 +16,7 @@ RUN rm -f /var/log/lastlog /var/log/faillog \
 
 ## Fix permissions
 RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
+RUN chmod +x ${USER_HOME_DIR}/soavirt/entrypoint.sh
 
 RUN touch /var/log/lastlog && \
     touch /var/log/faillog
