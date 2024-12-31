@@ -424,6 +424,8 @@ allprojects {
                     -report ./demoApp-jenkins/soatest/func-report \
                     "
                     '''
+                    //Archive all documents for review
+                    archiveArtifacts artifacts: '**/demoApp-jenkins/soatest/func-report/*.html', allowEmptyArchive: true
                 echo '---> Parsing 9.x soatest reports'
                 script {
                     step([$class: 'XUnitPublisher', 
