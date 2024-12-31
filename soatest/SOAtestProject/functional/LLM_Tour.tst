@@ -9,9 +9,9 @@ suite:
     environments:
     - variables:
       - name: OPENAPI
-        value: http://localhost:4040/pda/api-docs/v1
+        value: http://localhost:8080/pda/api-docs/v1
       - name: BASEURL
-        value: http://localhost:4040
+        value: http://localhost:8080
       name: Default  Environment
       active: true
   enabled: true
