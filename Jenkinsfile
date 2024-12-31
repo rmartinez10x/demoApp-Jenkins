@@ -256,7 +256,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -311,7 +311,7 @@ allprojects {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
