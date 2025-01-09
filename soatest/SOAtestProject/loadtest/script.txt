@@ -1,0 +1,14 @@
+
+# Using script commands
+#
+  
+var report-home = /usr/local/parasoft/demoApp-jenkins/soatest/load-report
+var minutes = 1
+  
+var scenario = "Linear Increase"
+var base = /usr/local/parasoft/demoApp-jenkins/soatest/SOAtestProject/loadtest
+var category = Accuracy
+  
+var test-name = LLM_Tour
+open ${base}/${test-name}.lt
+loadtest -env "demoApp-baseline (docker)" -minutes ${minutes} -allReports ${report-home}/%d/${category}/${test-name} ${scenario}

@@ -467,7 +467,7 @@ allprojects {
                     -v "$PWD/demoApp-jenkins:/usr/local/parasoft/demoApp-jenkins" \
                     -w "/usr/local/parasoft" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/soatest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/soatest) /bin/bash -c " \
                
                     # Execute the project with SOAtest CLI
                     ./soavirt/loadtest \
