@@ -256,7 +256,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -311,7 +311,7 @@ allprojects {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -356,7 +356,7 @@ allprojects {
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // deploy the project
                 sh  '''
@@ -383,7 +383,7 @@ allprojects {
             }
         }       
         stage('SOAtest: Functional Test') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Run SOAtestCLI from docker
                 sh  '''

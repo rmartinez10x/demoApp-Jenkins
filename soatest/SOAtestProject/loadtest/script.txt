@@ -5,7 +5,7 @@
 var report-home = /usr/local/parasoft/demoApp-jenkins/soatest/load-report
 var minutes = 1
   
-var scenario = "Linear Increase"
+var scenario = "Steady Load"
 var base = /usr/local/parasoft/demoApp-jenkins/soatest/SOAtestProject/loadtest
 var category = Accuracy
   
