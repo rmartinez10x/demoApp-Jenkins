@@ -419,7 +419,6 @@ allprojects {
                     -resource /demoApp-jenkins/soatest/SOAtestProject/functional \
                     -config '${soatestConfig}' \
                     -settings ./soavirt_workspace/demoApp-jenkins/soatest/soatestcli.properties \
-                    -environment 'demoApp-baseline (docker)' \
                     -property application.coverage.runtime.dir=/usr/local/parasoft/soavirt_workspace/SOAtestProject/coverage_runtime_dir \
                     -report ./demoApp-jenkins/soatest/func-report \
                     "
