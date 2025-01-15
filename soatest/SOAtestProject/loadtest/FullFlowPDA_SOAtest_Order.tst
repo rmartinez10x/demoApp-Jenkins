@@ -9,13 +9,13 @@ suite:
     environments:
     - variables:
       - name: BASEURL
-        value: http://qa1.parasoft.com:4040
+        value: http://demoApp-baseline:8080
       name: recorded_environment
       active: true
   enabled: true
   name: Test Suite
   rootTestSuite: true
-  lastModifiedBy: anonymous
+  lastModifiedBy: rmartinez
   authentications:
   - $type: BasicAuthentication
     name: Basic
@@ -29,7 +29,7 @@ suite:
         password: AwAAACx4YXhJU3NQdUtXUkFoUCtIMld0c1lib0JWN3EwSW9ialFiaXhxWndPMi9vPQ==
   profileMappingID: 0
   maxProfileMappingID: 1
-  nextIdentifier: 49
+  nextIdentifier: 50
   tests:
   - $type: RESTClientToolTest
     testID: 1
@@ -96,10 +96,10 @@ suite:
           type:
             $type: ElementType
             hash: 1
+            localName: ""
             bodyType:
               $type: ComplexType
               hash: 2
-              namespace: ""
               name: anonymous
               compositor: true
               compositorObj:
@@ -335,14 +335,10 @@ suite:
               type: text/xml
           virtualDSCreator:
             writableColumns:
-            - match: ""
-              customName: "Test 2: routeId"
-            - match: ""
-              customName: "Test 2: restEndPoints_routeId"
-            - match: ""
-              customName: "Test 2: restEndPoints_3_routeId"
-            - match: ""
-              customName: "Test 2: restEndPoints_5_routeId"
+            - customName: "Test 2: routeId"
+            - customName: "Test 2: restEndPoints_routeId"
+            - customName: "Test 2: restEndPoints_3_routeId"
+            - customName: "Test 2: restEndPoints_5_routeId"
         conversionStrategy:
           dataFormatName: JSON
           conversionStrategyId: JSON
@@ -1949,8 +1945,7 @@ suite:
               type: text/xml
           virtualDSCreator:
             writableColumns:
-            - match: ""
-              customName: "Test 9: id"
+            - customName: "Test 9: id"
         conversionStrategy:
           dataFormatName: JSON
           conversionStrategyId: JSON
@@ -2216,10 +2211,8 @@ suite:
               type: text/xml
           virtualDSCreator:
             writableColumns:
-            - match: ""
-              customName: "Test 10: itemId"
-            - match: ""
-              customName: "Test 10: data_2_itemId"
+            - customName: "Test 10: itemId"
+            - customName: "Test 10: data_2_itemId"
         conversionStrategy:
           dataFormatName: JSON
           conversionStrategyId: JSON
@@ -4288,8 +4281,7 @@ suite:
               type: text/xml
           virtualDSCreator:
             writableColumns:
-            - match: ""
-              customName: "Test 19: data_4"
+            - customName: "Test 19: data_4"
         conversionStrategy:
           dataFormatName: JSON
           conversionStrategyId: JSON
@@ -9955,8 +9947,7 @@ suite:
               type: text/xml
           virtualDSCreator:
             writableColumns:
-            - match: ""
-              customName: "Test 43: locationInfo"
+            - customName: "Test 43: locationInfo"
         conversionStrategy:
           dataFormatName: JSON
           conversionStrategyId: JSON
