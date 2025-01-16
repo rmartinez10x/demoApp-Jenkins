@@ -90,7 +90,7 @@ pipeline {
                     scope.xmlmap=false
                     
                     scontrol.git.exec=git
-                    scontrol.rep1.git.branch=master
+                    scontrol.rep1.git.branch=main
                     scontrol.rep1.git.url=https://github.com/parasoft/parasoft-demo-app
                     scontrol.rep1.type=git
 
@@ -138,7 +138,7 @@ pipeline {
                     application.coverage.images=${soatestCovImage}
 
                     scontrol.git.exec=git
-                    scontrol.rep1.git.branch=master
+                    scontrol.rep1.git.branch=main
                     scontrol.rep1.git.url=https://github.com/parasoft/parasoft-demo-app
                     scontrol.rep1.type=git
                     " > ./demoApp-jenkins/soatest/soatestcli.properties
