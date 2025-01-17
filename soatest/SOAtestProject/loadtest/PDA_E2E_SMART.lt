@@ -1,0 +1,281 @@
+---
+parasoftVersion: 2024.2.0
+productVersion: 10.7.1
+schemaVersion: 1
+config:
+  $type: SimulatorConfiguration
+  profiles:
+  - profileRunnableMap:
+      profileRunnablePaths:
+      - "/Test Suite: Test Suite"
+      - 0
+      - "/Test Suite: Test Suite/Scenario: E2E API Flow"
+      - 1
+      - "/Test Suite: Test Suite/Scenario: /v1/locations"
+      - 2
+    id: Test Suite
+    agentCreator:
+      $type: RealTimeAgentCreator
+  enabledInstances:
+  - host: localhost
+  scenarios:
+  - enabledInstanceScenarios:
+    - stopSequenceConfig:
+        stopType: 2
+      instInfo:
+        host: localhost
+      agentRunner:
+        $type: FlexThreadsAgentRunner
+      profScheduler:
+        $type: RandomStaticProfileScheduler
+        weights:
+        - Test Suite
+        - $type: LinearInterpolator
+          id: Test Suite
+          set:
+            keys:
+            - value: 1.0
+        agentScheduler:
+          $type: SimpleStaticAgentScheduler
+          interpol:
+            $type: LinearInterpolator
+            id: localhost
+            set:
+              keys:
+              - value: 0.8
+              - arg: 60.0
+                value: 4.0
+    metrics:
+    - $type: StatisticMetric
+      name: Low Server Time
+      notes: ""
+      details: Details
+      statistic: Avg. Server Time (ms)
+      operator: <
+      threshold: 500.0
+    - $type: LossMetric
+      name: 100% Success
+      notes: ""
+      details: Details
+      operator: ==
+    - $type: StatisticMetric
+      name: Low Execution Time
+      notes: ""
+      details: Details
+      statistic: Avg. Exe. Time (ms)
+      operator: <
+      threshold: 750.0
+    - $type: ThroughputMetric
+      name: Fast Hit Rate
+      notes: ""
+      details: Details
+      operator: '>='
+      rate: Hits per Second
+      threshold: 10
+    - $type: CountMetric
+      name: No Failures
+      notes: ""
+      details: Details
+      counter: Failure Count
+      operator: ==
+    durationSec: 60
+    name: Linear Increase
+  stopMonitor:
+    stopMethodDefined: true
+    stopMethod:
+      hasCode: true
+      code:
+        $type: JythonCode
+        input:
+          file: true
+          fileObj:
+            path: ..\..\..\..\..\..\Program Files\Parasoft\SOAtest & Virtualize\2024.2\plugins\com.parasoft.ptest.libs.web_10.7.1.202410281200\root
+          useText: true
+          textInput:
+            $type: ScriptingTextInput
+            text: "# For examples on creating custom Load Test stop actions, see CustomStopActions.py\
+              \ in\r\n# SOAtest installation directory in examples/scripts/LoadTesterScripting.\r\
+              \n"
+      hasMethodId: true
+      methodId:
+        $type: JythonMethodIdentifier
+  stopSequenceConfig:
+    stopType: 2
+  componentFactory: true
+  componentFactoryObj:
+    prototypeProps: true
+    props:
+      properties:
+      - key: SOATEST_PROJECT_PATH_RELATIVE
+        value: "true"
+      - key: PROP_SOATEST_PROJECT_FILE_PATH
+        value: PDA E2E Smart API Test.tst
+    caLoc: true
+    caLoc:
+      $type: BuiltinComponentLocation
+      locationName: Parasoft SOAtest Component
+  simOptions:
+    $type: LoadTestOptions
+  viewConfig: true
+  viewConfigObj:
+    $type: LoadTestViewConfig
+    containerConfig:
+      highThroughputLayouts:
+      - layout: 5
+      - windows:
+        - 8
+        - {}
+        - 7
+        - graphTitles:
+          - Verified Avg. Execution Time (ms)
+        - 6
+        - graphTitles:
+          - Verified Max. Execution Time (ms)
+        - 5
+        - graphTitles:
+          - Verified Min. Execution Time (ms)
+        - 4
+        - graphTitles:
+          - Total Virtual Users
+        - 3
+        - graphTitles:
+          - Verified Test Error Rate (1/sec)
+        - 2
+        - graphTitles:
+          - Total Tests Start Rate (1/sec)
+        - 1
+        - graphTitles:
+          - Verified Tests Completion Rate (1/sec)
+        - 0
+        - graphTitles:
+          - Total Tests Completion Rate (1/sec)
+      - layout: 4
+      - windows:
+        - 3
+        - {}
+        - 2
+        - graphTitles:
+          - Total Virtual Users
+        - 1
+        - graphTitles:
+          - Verified Min. Execution Time (ms)
+          - Verified Max. Execution Time (ms)
+          - Verified Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Total Tests Completion Rate (1/sec)
+          - Verified Tests Completion Rate (1/sec)
+          - Total Tests Start Rate (1/sec)
+          - Verified Test Error Rate (1/sec)
+      - layout: 3
+      - windows:
+        - 1
+        - graphTitles:
+          - Verified Min. Execution Time (ms)
+          - Verified Max. Execution Time (ms)
+          - Verified Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Total Tests Completion Rate (1/sec)
+          - Verified Tests Completion Rate (1/sec)
+          - Verified Test Error Rate (1/sec)
+      - layout: 2
+      - windows:
+        - 1
+        - graphTitles:
+          - Verified Min. Execution Time (ms)
+          - Verified Max. Execution Time (ms)
+          - Verified Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Total Tests Completion Rate (1/sec)
+          - Verified Tests Completion Rate (1/sec)
+          - Verified Test Error Rate (1/sec)
+      - layout: 1
+      - windows:
+        - 0
+        - graphTitles:
+          - Total Tests Completion Rate (1/sec)
+          - Verified Tests Completion Rate (1/sec)
+          - Verified Test Error Rate (1/sec)
+      layouts:
+      - layout: 5
+      - windows:
+        - 8
+        - {}
+        - 7
+        - {}
+        - 6
+        - graphTitles:
+          - Avg. Execution Time (ms)
+        - 5
+        - graphTitles:
+          - Max. Execution Time (ms)
+        - 4
+        - graphTitles:
+          - Min. Execution Time (ms)
+        - 3
+        - graphTitles:
+          - Virtual Users
+        - 2
+        - graphTitles:
+          - Test Error Rate (1/sec)
+        - 1
+        - graphTitles:
+          - Tests Completion Rate (1/sec)
+        - 0
+        - graphTitles:
+          - Tests Start Rate (1/sec)
+      - layout: 4
+      - windows:
+        - 3
+        - {}
+        - 2
+        - graphTitles:
+          - Virtual Users
+        - 1
+        - graphTitles:
+          - Min. Execution Time (ms)
+          - Max. Execution Time (ms)
+          - Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Test Error Rate (1/sec)
+          - Tests Completion Rate (1/sec)
+          - Tests Start Rate (1/sec)
+      - layout: 3
+      - windows:
+        - 1
+        - graphTitles:
+          - Min. Execution Time (ms)
+          - Max. Execution Time (ms)
+          - Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Tests Start Rate (1/sec)
+          - Tests Completion Rate (1/sec)
+          - Virtual Users
+      - layout: 2
+      - windows:
+        - 1
+        - graphTitles:
+          - Min. Execution Time (ms)
+          - Max. Execution Time (ms)
+          - Avg. Execution Time (ms)
+        - 0
+        - graphTitles:
+          - Tests Start Rate (1/sec)
+          - Tests Completion Rate (1/sec)
+          - Virtual Users
+      - layout: 1
+      - windows:
+        - 0
+        - graphTitles:
+          - Tests Completion Rate (1/sec)
+          - Test Error Rate (1/sec)
+          - Virtual Users
+      layout:
+        layout: 4
+  rawOutputConfig: true
+  rawOutputConfigObj:
+    $type: DetailedReportConfiguration

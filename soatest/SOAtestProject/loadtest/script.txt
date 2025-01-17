@@ -5,10 +5,10 @@
 var report-home = /usr/local/parasoft/demoApp-jenkins/soatest/load-report
 var minutes = 1
   
-var scenario = "Steady Load"
+var scenario = "Linear Increase"
 var base = /usr/local/parasoft/demoApp-jenkins/soatest/SOAtestProject/loadtest
 var category = Accuracy
   
-var test-name = LLM_Tour
+var test-name = PDA_E2E_SMART
 open ${base}/${test-name}.lt
-loadtest -env "demoApp-baseline (docker)" -minutes ${minutes} -allReports ${report-home}/%d/${category}/${test-name} ${scenario}
+loadtest -env "DemoApp_baseline" -minutes ${minutes} -allReports ${report-home}/%d/${category}/${test-name} ${scenario}
