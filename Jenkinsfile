@@ -256,7 +256,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: false, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
