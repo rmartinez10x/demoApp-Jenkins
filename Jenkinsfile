@@ -311,7 +311,7 @@ allprojects {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: false, actual: true }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
