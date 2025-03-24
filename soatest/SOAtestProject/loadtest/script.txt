@@ -11,4 +11,4 @@ var category = Accuracy
   
 var test-name = PDA_E2E_SMART
 open ${base}/${test-name}.lt
-loadtest -env "DemoApp_baseline" -minutes ${minutes} -allReports ${report-home}/%d/${category}/${test-name} ${scenario}
+loadtest -env "DemoApp_baseline" -minutes ${minutes} -allReports ${report-home} ${scenario}

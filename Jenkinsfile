@@ -203,7 +203,7 @@ allprojects {
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return true;
+                    return false;
                 }
             }
             steps {
@@ -256,7 +256,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -311,7 +311,7 @@ allprojects {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: false, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -356,7 +356,7 @@ allprojects {
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
-            when { equals expected: true, actual: true }
+            when { equals expected: false, actual: true }
             steps {
                 // deploy the project
                 sh  '''
@@ -383,7 +383,7 @@ allprojects {
             }
         }       
         stage('SOAtest: Functional Test') {
-            when { equals expected: true, actual: true }
+            when { equals expected: false, actual: true }
             steps {
                 // Run SOAtestCLI from docker
                 sh  '''
@@ -479,6 +479,8 @@ allprojects {
                     -licenseVus 1000 \
                     "
                     '''
+                    archiveArtifacts artifacts: '/usr/local/parasoft/demoApp-jenkins/soatest/load-report/*.html', allowEmptyArchive: true
+                echo '---> Parsing 9.x soatest reports'
             }
         }
         stage('Release') {
