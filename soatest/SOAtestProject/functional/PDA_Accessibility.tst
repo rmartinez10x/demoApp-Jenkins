@@ -11,6 +11,10 @@ suite:
       - name: LOCALHOST_BASE_URL
         value: http://localhost:4040
       name: Default localhost Environment
+    - variables:
+      - name: LOCALHOST_BASE_URL
+        value: http://demoApp-baseline:8080
+      name: Baseline
       active: true
   enabled: true
   name: Test Suite
