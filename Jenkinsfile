@@ -133,6 +133,10 @@ pipeline {
                     scope.scontrol=true
                     scope.xmlmap=false
 
+                    techsupport.auto_creation=true
+                    techsupport.archive_location=/usr/local/parasoft/soavirt_workspace/demoApp-jenkins/soatest/func-report/
+                    techsupport.verbose=true
+
                     application.coverage.enabled=true
                     application.coverage.agent.url=http\\://${app_name}\\:${app_cov_port}
                     application.coverage.images=${soatestCovImage}
@@ -265,7 +269,7 @@ allprojects {
                     report.coverage.images=${unitCovImage}
                     " > ./demoApp-jenkins/jtest/jtestcli-ut.properties
                 '''
-                // Execute the build with Jtest Maven plugin in docker
+                // Execute the build with Jtest Gradle plugin in docker
                 sh '''
                     # Run Gradle build with Jtest tasks via Docker
                     docker run \
@@ -353,21 +357,14 @@ allprojects {
                     #ls -ll
                     #ls -la monitor
                     '''
+                    archiveArtifacts artifacts: '**/demoApp/build/jtest/monitor.zip', allowEmptyArchive: true
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
             when { equals expected: true, actual: true }
             steps {
                 // deploy the project
-                sh  '''
-                    # Run demoApp-baseline docker image with Jtest coverage agent configured
-                    docker run \
-                    -d \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    -p ${app_port}:8080 \
-                    -p ${app_cov_port}:8050 \
-                    -p ${app_db_port}:9001 \
-                    -p ${app_jms_port}:61616 \
+                sh  '''}:61616 \
                     --env-file "$PWD/demoApp-jenkins/jtest/monitor.env" \
                     -v "$PWD/monitor:/home/docker/jtest/monitor" \
                     --network=demo-net \
@@ -379,6 +376,14 @@ allprojects {
                     docker ps -f name=${app_name}
                     curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
+                    # Run demoApp-baseline docker image with Jtest coverage agent configured
+                    docker run \
+                    -d \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    -p ${app_port}:8080 \
+                    -p ${app_cov_port}:8050 \
+                    -p ${app_db_port}:9001 \
+                    -p ${app_jms_port
                     '''
             }
         }       
@@ -424,7 +429,7 @@ allprojects {
                     "
                     '''
                     //Archive all documents for review
-                    archiveArtifacts artifacts: '**/demoApp-jenkins/soatest/func-report/*.html', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**/demoApp-jenkins/soatest/func-report/**', allowEmptyArchive: true
                 echo '---> Parsing 9.x soatest reports'
                 script {
                     step([$class: 'XUnitPublisher', 
