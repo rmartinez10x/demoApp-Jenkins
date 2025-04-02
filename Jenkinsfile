@@ -364,7 +364,7 @@ allprojects {
             when { equals expected: true, actual: true }
             steps {
                 // deploy the project
-                sh  '''}:61616 \
+                sh  '''
                     --env-file "$PWD/demoApp-jenkins/jtest/monitor.env" \
                     -v "$PWD/monitor:/home/docker/jtest/monitor" \
                     --network=demo-net \
@@ -383,7 +383,7 @@ allprojects {
                     -p ${app_port}:8080 \
                     -p ${app_cov_port}:8050 \
                     -p ${app_db_port}:9001 \
-                    -p ${app_jms_port
+                    -p ${app_jms_port}:61616 \
                     '''
             }
         }       
