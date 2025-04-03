@@ -365,6 +365,14 @@ allprojects {
             steps {
                 // deploy the project
                 sh  '''
+                # Run demoApp-baseline docker image with Jtest coverage agent configured
+                    docker run \
+                    -d \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    -p ${app_port}:8080 \
+                    -p ${app_cov_port}:8050 \
+                    -p ${app_db_port}:9001 \
+                    -p ${app_jms_port}:61616 \
                     --env-file "$PWD/demoApp-jenkins/jtest/monitor.env" \
                     -v "$PWD/monitor:/home/docker/jtest/monitor" \
                     --network=demo-net \
@@ -376,14 +384,7 @@ allprojects {
                     docker ps -f name=${app_name}
                     curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
-                    # Run demoApp-baseline docker image with Jtest coverage agent configured
-                    docker run \
-                    -d \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    -p ${app_port}:8080 \
-                    -p ${app_cov_port}:8050 \
-                    -p ${app_db_port}:9001 \
-                    -p ${app_jms_port}:61616 \
+                    
                     '''
             }
         }       
