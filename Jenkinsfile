@@ -200,7 +200,6 @@ allprojects {
 
                     " > ./demoApp-jenkins/jtest/init.gradle
                     '''
-
             }
         }
         stage('Jtest: Quality Scan') {
@@ -316,72 +315,30 @@ allprojects {
         stage('Jtest: Package-CodeCoverage') {
             when { equals expected: true, actual: true }
             steps {
-                // Setup stage-specific additional settings
                 sh '''
-                    # Set Up and write .properties file
-                    echo $"
-                    report.coverage.images=${soatestCovImage}
-                    " > ./demoApp-jenkins/jtest/jtestcli-ft.properties
-                '''
-                // Execute the build with Jtest Maven plugin in docker
+                echo $"
+                report.coverage.images=${soatestCovImage}
+                " > ./demoApp-jenkins/jtest/jtestcli-ft.properties
+            '''
                 sh '''
-                    # Run Gradle build with Jtest tasks via Docker
-                    docker run \
-                    -u ${jenkins_uid}:${jenkins_gid} \
-                    --rm -i \
-                    --name jtest \
-                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                    -w "/home/parasoft/jenkins/demoApp" \
-                    --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                    #Gradle execution
-                    ./gradlew jtest-monitor \
-                    -I '../demoApp-jenkins/jtest/init.gradle' \
-                    -Djtest.home=/opt/parasoft/jtest \
-                    -DskipTests=true \
-                    -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ft.properties' \
-                    -Djtest.showSettings=true \
-                    --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish};
-                    "
-
-                    # check demoApp/build permissions
-                    #ls -la ./demoApp/build
-
-                    # Unzip monitor.zip
-                    mkdir monitor
-                    unzip -q ./demoApp/build/jtest/monitor.zip -d .
-                    #ls -ll
-                    #ls -la monitor
-                    '''
-                    archiveArtifacts artifacts: '**/demoApp/build/jtest/monitor.zip', allowEmptyArchive: true
-            }
-        }
-
-        stage('Jtest: Start Monitor') {
-            when { equals expected: true, actual: true }
-            steps {
-                sh '''
-            # Start Jtest monitoring using jtestcov
             docker run \
+                -d -i \
+                --name jtest-monitor \
                 -u ${jenkins_uid}:${jenkins_gid} \
-                --rm -i \
-                --name jtest-monitor-start \
                 -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
                 -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                 -w "/home/parasoft/jenkins/demoApp" \
                 --network=demo-net \
                 $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                /opt/parasoft/jtest/jtestcov start \
-                    --config 'builtin://Calculate Application Coverage' \
-                    --data build/jtest/jtest.data.json \
-                    --settings ../demoApp-jenkins/jtest/jtestcli.properties \
-                    --settings ../demoApp-jenkins/jtest/jtestcli-ft.properties \
-                    --report build/reports/jtest \
-                    --monitor true"
+                /opt/parasoft/jtest/jtestcli \
+                    -config 'builtin://Calculate Application Coverage' \
+                    -data build/jtest/jtest.data.json \
+                    -settings ../demoApp-jenkins/jtest/jtestcli.properties \
+                    -settings ../demoApp-jenkins/jtest/jtestcli-ft.properties \
+                    -report build/reports/jtest \
+                    -monitor true \
+                    --keepalive"
         '''
             }
         }
@@ -516,22 +473,9 @@ allprojects {
         }
 
         stage('Jtest: Stop Monitor') {
-            when { equals expected: true, actual: true }
             steps {
-                sh '''
-            # Stop Jtest monitoring and generate coverage report
-            docker run \
-                -u ${jenkins_uid}:${jenkins_gid} \
-                --rm -i \
-                --name jtest-monitor-stop \
-                -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-                -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-                -w "/home/parasoft/jenkins/demoApp" \
-                --network=demo-net \
-                $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
-
-                /opt/parasoft/jtest/jtestcov stop"
-        '''
+                sh 'docker stop jtest-monitor'
+                sh 'docker cp jtest-monitor:/home/parasoft/jenkins/demoApp/build/reports/jtest ./demoApp/build/reports/jtest'
                 archiveArtifacts artifacts: '**/demoApp/build/reports/jtest/**', allowEmptyArchive: true
             }
         }
