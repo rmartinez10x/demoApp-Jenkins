@@ -6,41 +6,41 @@ pipeline {
     }
     environment {
         // App Settings
-        project_name="demoApp-Jenkins" //DTP Project
-        app_name="demoApp-baseline" //docker container
-        image="parasoft/demo-app:baseline" //docker image
-        app_short="DA" //demoApp
-        app_port=8090
-        app_cov_port=8050
-        app_db_port=9021
-        app_jms_port=63616
+        project_name = 'demoApp-Jenkins' //DTP Project
+        app_name = 'demoApp-baseline' //docker container
+        image = 'parasoft/demo-app:baseline' //docker image
+        app_short = 'DA' //demoApp
+        app_port = 8090
+        app_cov_port = 8050
+        app_db_port = 9021
+        app_jms_port = 63616
 
         // Jenkins UID:GID
         //jenkins_uid=992
         //jenkins_gid=992
 
         // Parasoft Licenses
-        ls_url="${PARASOFT_LS_URL}" //https\://dtp:8443
-        ls_user="${PARASOFT_LS_USER}" //admin
-        ls_pass="${PARASOFT_LS_PASS}"
-        
+        ls_url = "${PARASOFT_LS_URL}" //https\://dtp:8443
+        ls_user = "${PARASOFT_LS_USER}" //admin
+        ls_pass = "${PARASOFT_LS_PASS}"
+
         // Parasoft Common Settings
-        dtp_url="${PARASOFT_DTP_URL}" //https://dtp:8443
-        dtp_user="${PARASOFT_DTP_USER}" //admin
-        dtp_pass="${PARASOFT_DTP_PASS}"
-        dtp_publish="${PARASOFT_DTP_PUBLISH}" //false
+        dtp_url = "${PARASOFT_DTP_URL}" //https://dtp:8443
+        dtp_user = "${PARASOFT_DTP_USER}" //admin
+        dtp_pass = "${PARASOFT_DTP_PASS}"
+        dtp_publish = "${PARASOFT_DTP_PUBLISH}" //false
         //buildId="${app_short}-${BUILD_TIMESTAMP}"
-        
+
         // Parasoft Jtest Settings
-        jtestSAConfig="jtest.builtin://Recommended Rules"
-        jtestMAConfig="jtest.builtin://Metrics"
-        jtestSessionTag="demoAppJenkins-Jtest"
-        unitCovImage="demoApp_All;demoApp_UnitTest"
+        jtestSAConfig = 'jtest.builtin://Recommended Rules'
+        jtestMAConfig = 'jtest.builtin://Metrics'
+        jtestSessionTag = 'demoAppJenkins-Jtest'
+        unitCovImage = 'demoApp_All;demoApp_UnitTest'
 
         // Parasoft SOAtest Settings
-        soatestConfig="soatest.user://Example Configuration"
-        soatestSessionTag="demoAppJenkins-SOAtest"
-        soatestCovImage="demoApp_All;demoApp_SOAtest"
+        soatestConfig = 'soatest.user://Example Configuration'
+        soatestSessionTag = 'demoAppJenkins-SOAtest'
+        soatestCovImage = 'demoApp_All;demoApp_SOAtest'
     }
     stages {
         stage('Setup') {
@@ -54,7 +54,7 @@ pipeline {
                     env.buildTimestamp = sh(script: 'date +%Y%m%d', returnStdout: true).trim()
                     env.buildId = "${app_short}-${buildTimestamp}"
                 }
-                         
+
                 // setup the workspace
                 sh  '''
                     # Clone this repository & demoApp repository into the workspace
@@ -88,7 +88,7 @@ pipeline {
                     scope.local=true
                     scope.scontrol=true
                     scope.xmlmap=false
-                    
+
                     scontrol.git.exec=git
                     scontrol.rep1.git.branch=main
                     scontrol.rep1.git.url=https://github.com/parasoft/parasoft-demo-app
@@ -116,7 +116,7 @@ pipeline {
                     soatest.license.use_network=true
                     soatest.license.network.edition=custom_edition
                     soatest.license.custom_edition_features=RuleWizard, Command Line, SOA, Web, Server API Enabled, Message Packs, Advanced Test Generation Desktop, Requirements Traceability, API Security Testing
-                    
+
                     dtp.enabled=true
                     dtp.url=${dtp_url}
                     dtp.user=${dtp_user}
@@ -147,7 +147,7 @@ pipeline {
                     scontrol.rep1.type=git
                     " > ./demoApp-jenkins/soatest/soatestcli.properties
                     '''
-                    
+
                     sh  '''
                     # Set Up and write .properties file
                     echo $"
@@ -186,7 +186,7 @@ pipeline {
         classpath 'com.parasoft.jtest:jtest-gradle-plugin:2024.2.0'
         classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2024.2.0'
     }
-}
+                    }
 rootProject {
     apply plugin: com.parasoft.jtest.plugin.gradle.JtestPlugin
 }
@@ -201,13 +201,12 @@ allprojects {
                     " > ./demoApp-jenkins/jtest/init.gradle
                     '''
 
-
             }
         }
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return false;
+                    return false
                 }
             }
             steps {
@@ -298,16 +297,16 @@ allprojects {
                     archiveArtifacts artifacts: '**/target/jtest/ut/*.xml', allowEmptyArchive: true
                 echo '---> Parsing 10.x unit test reports'
                 script {
-                    step([$class: 'XUnitPublisher', 
+                    step([$class: 'XUnitPublisher',
                         // thresholds: [failed(
-                        //     failureNewThreshold: '0', 
+                        //     failureNewThreshold: '0',
                         //     failureThreshold: '0')
                         // ],
-                        tools: [[$class: 'ParasoftType', 
-                            deleteOutputFiles: true, 
-                            failIfNotNew: false, 
-                            pattern: '**/target/jtest/ut/report.xml', 
-                            skipNoTestFiles: true, 
+                        tools: [[$class: 'ParasoftType',
+                            deleteOutputFiles: true,
+                            failIfNotNew: false,
+                            pattern: '**/target/jtest/ut/report.xml',
+                            skipNoTestFiles: true,
                             stopProcessingIfError: false
                         ]]
                     ])
@@ -360,6 +359,33 @@ allprojects {
                     archiveArtifacts artifacts: '**/demoApp/build/jtest/monitor.zip', allowEmptyArchive: true
             }
         }
+
+        stage('Jtest: Start Monitor') {
+            when { equals expected: true, actual: true }
+            steps {
+                sh '''
+            # Start Jtest monitoring using jtestcov
+            docker run \
+                -u ${jenkins_uid}:${jenkins_gid} \
+                --rm -i \
+                --name jtest-monitor-start \
+                -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                -w "/home/parasoft/jenkins/demoApp" \
+                --network=demo-net \
+                $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                /opt/parasoft/jtest/jtestcov start \
+                    --config 'builtin://Calculate Application Coverage' \
+                    --data build/jtest/jtest.data.json \
+                    --settings ../demoApp-jenkins/jtest/jtestcli.properties \
+                    --settings ../demoApp-jenkins/jtest/jtestcli-ft.properties \
+                    --report build/reports/jtest \
+                    --monitor true"
+        '''
+            }
+        }
+
         stage('Jtest: Deploy-CodeCoverage') {
             when { equals expected: true, actual: true }
             steps {
@@ -384,10 +410,10 @@ allprojects {
                     docker ps -f name=${app_name}
                     curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
-                    
+
                     '''
             }
-        }       
+        }
         stage('SOAtest: Functional Test') {
             when { equals expected: true, actual: true }
             steps {
@@ -403,10 +429,9 @@ allprojects {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/soatest) /bin/bash -c " \
 
-
                     #Checking permissions of the entrypoint sh file
                     ls -l /usr/local/parasoft/soavirt/entrypoint.sh; \
-                    
+
                     # Create workspace directory and copy SOAtest project into it
                     mkdir -p ./soavirt_workspace; \
                     cp -f -R ./demoApp-jenkins ./soavirt_workspace/demoApp-jenkins; \
@@ -416,7 +441,7 @@ allprojects {
                     -data ./soavirt_workspace \
                     -settings ./soavirt_workspace/demoApp-jenkins/soatest/soatestcli.properties \
                     -import ./soavirt_workspace/demoApp-jenkins/.project; \
-                    
+
                     # Execute the project with SOAtest CLI
                     ./soavirt/soatestcli \
                     -J-Dcom.parasoft.browser.BrowserPropertyOptions.CHROME_ARGUMENTS=headless,disable-gpu,no-sandbox,disable-dev-shm-usage \
@@ -433,18 +458,18 @@ allprojects {
                     archiveArtifacts artifacts: '**/demoApp-jenkins/soatest/func-report/**', allowEmptyArchive: true
                 echo '---> Parsing 9.x soatest reports'
                 script {
-                    step([$class: 'XUnitPublisher', 
+                    step([$class: 'XUnitPublisher',
                         // thresholds: [failed(
-                        //     failureNewThreshold: '10', 
+                        //     failureNewThreshold: '10',
                         //     failureThreshold: '10',
-                        //     unstableNewThreshold: '20', 
+                        //     unstableNewThreshold: '20',
                         //     unstableThreshold: '20')
                         // ],
-                        tools: [[$class: 'ParasoftSOAtest9xType', 
-                            deleteOutputFiles: true, 
-                            failIfNotNew: false, 
-                            pattern: '**/soatest/func-report/*.xml', 
-                            skipNoTestFiles: true, 
+                        tools: [[$class: 'ParasoftSOAtest9xType',
+                            deleteOutputFiles: true,
+                            failIfNotNew: false,
+                            pattern: '**/soatest/func-report/*.xml',
+                            skipNoTestFiles: true,
                             stopProcessingIfError: false
                         ]]
                     ])
@@ -474,7 +499,7 @@ allprojects {
                     -w "/usr/local/parasoft" \
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/soatest) /bin/bash -c " \
-               
+
                     # Execute the project with SOAtest CLI
                     ./soavirt/loadtest \
                     -cmd \
@@ -489,12 +514,34 @@ allprojects {
                 echo '---> Parsing 9.x soatest reports'
             }
         }
+
+        stage('Jtest: Stop Monitor') {
+            when { equals expected: true, actual: true }
+            steps {
+                sh '''
+            # Stop Jtest monitoring and generate coverage report
+            docker run \
+                -u ${jenkins_uid}:${jenkins_gid} \
+                --rm -i \
+                --name jtest-monitor-stop \
+                -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                -w "/home/parasoft/jenkins/demoApp" \
+                --network=demo-net \
+                $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                /opt/parasoft/jtest/jtestcov stop"
+        '''
+                archiveArtifacts artifacts: '**/demoApp/build/reports/jtest/**', allowEmptyArchive: true
+            }
+        }
+
         stage('Release') {
             steps {
                 // Release the project
                 sh  '''
                 # Clean up
-                
+
                 '''
             }
         }
@@ -508,16 +555,16 @@ allprojects {
             sh 'docker image prune -f'
 
             archiveArtifacts(artifacts: '''
-                    **/target/**/*.war, 
-                    **/target/jtest/sa/**, 
-                    **/target/jtest/ut/**, 
-                    **/target/jtest/monitor/**, 
-                    **/soatest/func-report/**, 
+                    **/target/**/*.war,
+                    **/target/jtest/sa/**,
+                    **/target/jtest/ut/**,
+                    **/target/jtest/monitor/**,
+                    **/soatest/func-report/**,
                     **/soatest/load-report/**''',
-                fingerprint: true, 
+                fingerprint: true,
                 onlyIfSuccessful: true,
                 excludes: '''
-                    **/.jtest/**, 
+                    **/.jtest/**,
                     **/metadata.json'''
             )
 
