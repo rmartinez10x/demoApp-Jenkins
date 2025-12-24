@@ -379,12 +379,38 @@ allprojects {
                     --name ${app_name} \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/demoApp-docker)
 
+                    # Health Check — wait for application readiness
+                    echo "Waiting for application to become available..."
+
+                    echo "Ports inside container:"
+                    docker exec ${app_name} ss -lnt || true
+
+                    app_ready=false
+
+                    for i in {1..60}; do
+                    if curl -sf http://localhost:${app_port}/loginPage > /dev/null; then
+                        echo "Application is up!"
+                        app_ready=true
+                        break
+                    fi
+                    echo "Not ready yet... retrying ($i)"
+                    sleep 5
+                    done
+
+                    if [ "$app_ready" != "true" ]; then
+                    echo "ERROR: Application failed to start within expected time"
+                    docker logs ${app_name} || true
+                    exit 1
+                    fi
+
+
                     # Health Check
-                    sleep 15
                     docker ps -f name=${app_name}
                     curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
                     
+                    echo "Container logs:"
+                    docker logs ${app_name} || true
                     '''
             }
         }       
