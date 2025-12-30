@@ -21,24 +21,30 @@ RUN chmod +x ${USER_HOME_DIR}/soavirt/entrypoint.sh
 RUN touch /var/log/lastlog && \
     touch /var/log/faillog
 
-# Setup Chrome web driver for Web UI tests
-RUN rpm -ivh \
-        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-9.0-24.el9.noarch.rpm \
-        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-9.0-24.el9.noarch.rpm && \
-    dnf install -y --nodocs --repo baseos --repo appstream \
-        liberation-fonts \
-        vulkan-loader \
-        xdg-utils && \
-    rpm -evh \
-        centos-stream-repos \
-        centos-gpg-keys && \
+# Setup Chrome & dependencies for Web UI tests
+RUN dnf install -y \
+    liberation-fonts \
+    xdg-utils \
+    nss \
+    alsa-lib \
+    atk \
+    cups-libs \
+    gtk3 \
+    ipa-gothic-fonts \
+    libXcomposite \
+    libXcursor \
+    libXdamage \
+    libXrandr \
+    libXss \
+    mesa-libEGL \
+    mesa-libGL \
+    pango \
+    unzip && \
     rpm --import https://dl.google.com/linux/linux_signing_key.pub && \
-    dnf install -y --nodocs \
-        https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
-        unzip && \
+    dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
     dnf clean all && \
-    rm -rf /var/cache/dnf \
-    dnf install nss-tools
+    rm -rf /var/cache/dnf
+
 USER parasoft
 
 # Define working directory.
