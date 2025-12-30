@@ -21,13 +21,21 @@ RUN chmod +x ${USER_HOME_DIR}/soavirt/entrypoint.sh
 RUN touch /var/log/lastlog && \
     touch /var/log/faillog
 
-# Install Chrome only — let RPM resolve its own deps
-RUN rpm --import https://dl.google.com/linux/linux_signing_key.pub && \
-    dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm || \
-    dnf install -y --nobest https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf
+# Import Google signing key
+RUN rpm --import https://dl.google.com/linux/linux_signing_key.pub
 
+# Install dependencies for Chrome
+RUN dnf install -y \
+    xdg-utils nss atk cups-libs gtk3 libXcomposite libXcursor libXdamage \
+    libXrandr libXss mesa-libGL pango alsa-lib unzip \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
+
+# Install Google Chrome
+RUN dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
+    || dnf install -y --nobest https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
 
 USER parasoft
 
