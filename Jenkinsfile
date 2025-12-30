@@ -43,6 +43,15 @@ pipeline {
         soatestCovImage="demoApp_All;demoApp_SOAtest"
     }
     stages {
+        stage('Clean Workspace') {
+            steps {
+                sh '''
+                echo "Cleaning Jenkins workspace..."
+                rm -rf *
+                '''
+            }
+        }
+
         stage('Setup') {
             steps {
                 deleteDir()
