@@ -43,15 +43,6 @@ pipeline {
         soatestCovImage="demoApp_All;demoApp_SOAtest"
     }
     stages {
-        stage('Clean Workspace') {
-            steps {
-                sh '''
-                echo "Cleaning Jenkins workspace..."
-                rm -rf *
-                '''
-            }
-        }
-
         stage('Setup') {
             steps {
                 deleteDir()
@@ -68,7 +59,7 @@ pipeline {
                 sh  '''
                     # Clone this repository & demoApp repository into the workspace
                     mkdir demoApp-jenkins
-                    git clone https://github.com/rmartinez10x/demoApp-Jenkins.git demoApp-jenkins
+                    git clone --branch work-from-detached https://github.com/rmartinez10x/demoApp-Jenkins.git demoApp-jenkins
 
                     mkdir demoApp
                     git clone https://github.com/parasoft/parasoft-demo-app demoApp
