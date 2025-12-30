@@ -43,8 +43,6 @@ RUN dnf install -y \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
-
-
 # Switch back to parasoft user
 USER parasoft
 
