@@ -23,7 +23,6 @@ RUN chmod +x ${USER_HOME_DIR}/soavirt/entrypoint.sh
 # Ensure log files exist
 RUN touch /var/log/lastlog && touch /var/log/faillog
 
-# Install Chrome and minimal dependencies for headless execution
 RUN dnf install -y \
         liberation-fonts \
         xdg-utils \
@@ -32,7 +31,6 @@ RUN dnf install -y \
         atk \
         cups-libs \
         gtk3 \
-        ipa-gothic-fonts \
         libXcomposite \
         libXcursor \
         libXdamage \
@@ -42,7 +40,7 @@ RUN dnf install -y \
         pango \
         unzip \
     && rpm --import https://dl.google.com/linux/linux_signing_key.pub \
-    && dnf install -y https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
+    && dnf install -y --nobest https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
     && dnf clean all \
     && rm -rf /var/cache/dnf
 
