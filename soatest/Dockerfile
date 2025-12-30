@@ -27,8 +27,6 @@ RUN dnf install -y \
         liberation-fonts \
         xdg-utils \
         nss \
-        alsa-lib \
-        atk \
         cups-libs \
         gtk3 \
         libXcomposite \
@@ -38,11 +36,13 @@ RUN dnf install -y \
         libXss \
         mesa-libGL \
         pango \
+        alsa-lib \
         unzip \
     && rpm --import https://dl.google.com/linux/linux_signing_key.pub \
     && dnf install -y --nobest https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
     && dnf clean all \
     && rm -rf /var/cache/dnf
+
 
 # Switch back to parasoft user
 USER parasoft
