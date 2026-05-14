@@ -1,5 +1,5 @@
 # Base image
-FROM parasoft/soavirt:2024.2
+FROM parasoft/soavirt:2025.3
 
 # Host UID/GID mapping for Jenkins
 ARG HOST_UID=992
