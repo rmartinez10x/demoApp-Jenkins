@@ -183,8 +183,8 @@ pipeline {
         }
     }
     dependencies {
-        classpath 'com.parasoft.jtest:jtest-gradle-plugin:2025.2.0'
-        classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2025.2.0'
+        classpath 'com.parasoft.jtest:jtest-gradle-plugin:2025.2.5'
+        classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2025.2.5'
     }
 }
 rootProject {
