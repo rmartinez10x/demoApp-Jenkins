@@ -21,7 +21,9 @@ pipeline {
         jenkins_uid=992
         jenkins_gid=992
 
-        nvd_key="${NVD_APIKEY}" //nvd api key to speed up owasp dependency check
+        nvd_key="${429d6756-6a4e-4415-a004-4b6bb37199c5}" //nvd api key to speed up owasp dependency check
+        ossIndexUsername="${rmartinez@parasoft.com}" //Sonatype OSS Index Username *hint: email address
+        ossIndexPassword="${sonatype_pat_dlVDhPyn3_1t3tqIbbtDJ2UHQcvzsVupd-KimLhHd-I_buJV}" //Sonatype OSS Index Password
 
         // Parasoft Licenses
         ls_url="${PARASOFT_LS_URL}" //https\://dtp:8443
@@ -36,28 +38,39 @@ pipeline {
         buildId="${app_short}-${BUILD_TIMESTAMP}"
         
         // Parasoft Jtest Settings
-        jtestCWEConfig="builtin://CWE Top 25 2023"
-        jtestOWASPConfig="builtin://OWASP Top 10-2021"
-        jtestPCIConfig="builtin://PCI DSS 4.0"
-        jtestSTIGConfig="builtin://DISA-ASD-STIG"
-        jtestCERTConfig="builtin://CERT for Java"
-        jtestSessionTag="demoAppJenkins-Jtest-Security"
+        jtestCWEConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/CWE Top 25 2024.properties" //builtin://CWE Top 25 2024
+        jtestOWASPConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/OWASP Top 10-2021.properties" //builtin://OWASP Top 10-2021
+        jtestOWASPAPIConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/OWASP API Security Top 10-2023.properties" //builtin://OWASP API Security Top 10-2023
+        jtestPCIConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/PCI DSS 4.0.properties" //builtin://PCI DSS 4.0
+        jtestHIPAAConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/HIPAA.properties" //builtin://HIPAA
+        jtestSTIGConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/DISA-ASD-STIG.properties" //builtin://DISA-ASD-STIG
+        jtestCERTConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/CERT for Java.properties" //builtin://CERT for Java
+        jtestSessionTag="ParabankJenkins-Jtest-Security"
 
         // Parasoft SOAtest Settings
         soatestConfig="soatest.user://Example Configuration"
-        soatestSessionTag="demoAppJenkins-SOAtest-Security"
-        soatestCovImage="demoApp_All;demoApp_SOAtest"
+        soatestSessionTag="ParabankJenkins-SOAtest-Security"
+        soatestCovImage="Parabank_All;Parabank_SOAtest"
     }
     stages {
         stage('Setup') {
             steps {
                 deleteDir()
                                 
+
+                // setup additional environment
+                script {
+                    env.jenkins_uid = sh(script: 'id -u jenkins', returnStdout: true).trim()
+                    env.jenkins_gid = sh(script: 'id -g jenkins', returnStdout: true).trim()
+                    env.buildTimestamp = sh(script: 'date +%Y-%m-%d', returnStdout: true).trim()
+                    env.buildId = "${app_short}-${buildTimestamp}"
+                }
+
                 // setup the workspace
                 sh  '''
                     # Clone this repository & demoApp repository into the workspace
                     mkdir demoApp-jenkins
-                    git clone https://github.com/rmartinez10x/demoApp-Jenkins.git demoApp-jenkins
+                    git clone -b work-from-detached https://github.com/rmartinez10x/demoApp-Jenkins.git demoApp-jenkins
 
                     mkdir demoApp
                     git clone https://github.com/parasoft/parasoft-demo-app demoApp
@@ -210,7 +223,7 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     mvn \
                     jtest:jtest \
@@ -239,7 +252,7 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     mvn \
                     jtest:jtest \
@@ -254,6 +267,37 @@ pipeline {
                     '''
             }
         }
+
+        stage('Jtest: HIPAA') {
+            when { equals expected: true, actual: true }
+            steps {
+                // Execute the build with Jtest Maven plugin in docker
+                sh '''
+                    # Run Maven build with Jtest tasks via Docker
+                    docker run \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    --rm -i \
+                    --name jtest \
+                    -v "$PWD/parabank:/home/parasoft/jenkins/parabank" \
+                    -v "$PWD/parabank-jenkins:/home/parasoft/jenkins/parabank-jenkins" \
+                    -w "/home/parasoft/jenkins/parabank" \
+                    --network=demo-net \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./parabank-jenkins/jtest) /bin/bash -c " \
+
+                    mvn -ntp \
+                    jtest:jtest \
+                    -DskipTests=true \
+                    -s /home/parasoft/.m2/settings.xml \
+                    -Djtest.settings='../parabank-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='${jtestHIPAAConfig}' \
+                    -Djtest.report=./target/jtest/sast/hipaa \
+                    -Djtest.showSettings=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    "
+                    '''
+            }
+        }
+
         stage('Jtest: (SAST) DISA ASD-STIG') {
             when { equals expected: true, actual: false }
             steps {
@@ -268,7 +312,7 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     mvn \
                     jtest:jtest \
@@ -342,8 +386,10 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
+                    java -version \
+                    
                     mvn \
                     -s /home/parasoft/.m2/settings.xml \
                     -P owasp-dependency-check org.owasp:dependency-check-maven:10.0.2:check \
@@ -379,7 +425,7 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
                     
                     mvn package jtest:monitor \
                     -s /home/parasoft/.m2/settings.xml \
@@ -442,7 +488,7 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/usr/local/parasoft/demoApp-jenkins" \
                     -w "/usr/local/parasoft" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/soatest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/soatest) /bin/bash -c " \
 
                     # Create workspace directory and copy SOAtest project into it
                     mkdir -p ./soavirt_workspace; \
