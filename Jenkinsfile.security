@@ -22,8 +22,8 @@ pipeline {
         jenkins_gid=992
 
         nvd_key="${429d6756-6a4e-4415-a004-4b6bb37199c5}" //nvd api key to speed up owasp dependency check
-        ossIndexUsername="${rmartinez@parasoft.com}" //Sonatype OSS Index Username *hint: email address
-        ossIndexPassword="${sonatype_pat_dlVDhPyn3_1t3tqIbbtDJ2UHQcvzsVupd-KimLhHd-I_buJV}" //Sonatype OSS Index Password
+        ossIndexUsername="rmartinez@parasoft.com" //Sonatype OSS Index Username *hint: email address
+        ossIndexPassword="sonatype_pat_dlVDhPyn3_1t3tqIbbtDJ2UHQcvzsVupd-KimLhHd-I_buJV" //Sonatype OSS Index Password
 
         // Parasoft Licenses
         ls_url="${PARASOFT_LS_URL}" //https\://dtp:8443
