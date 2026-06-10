@@ -181,7 +181,7 @@ pipeline {
             }
         }
         stage('Jtest: (SAST) CWE Top 25') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
@@ -210,7 +210,7 @@ pipeline {
             }
         }
         stage('Jtest: (SAST) OWASP Top 10') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
@@ -279,7 +279,7 @@ pipeline {
         }
 
         stage('Jtest: HIPAA') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
@@ -383,7 +383,7 @@ pipeline {
             }
         }
         stage('Parasoft: (SCA) OWASP Dependency Check') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
