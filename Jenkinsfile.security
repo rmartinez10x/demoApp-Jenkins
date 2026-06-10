@@ -196,15 +196,15 @@ pipeline {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn compile \
-                    jtest:jtest \
+                    ./gradlew clean assemble jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestCWEConfig}' \
-                    -Djtest.report=./target/jtest/sast/cwe \
+                    -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    --stacktrace --debug \
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
             }
@@ -234,6 +234,16 @@ pipeline {
                     -Djtest.report=./target/jtest/sast/owasp \
                     -Djtest.showSettings=true \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
+
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    -DskipTests=true \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='${jtestOWASPConfig}' \
+                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.showSettings=true \
+                    --stacktrace --debug \
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
                     '''
             }
