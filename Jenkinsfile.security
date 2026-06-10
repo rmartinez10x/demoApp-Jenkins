@@ -38,19 +38,19 @@ pipeline {
         buildId="${app_short}-${BUILD_TIMESTAMP}"
         
         // Parasoft Jtest Settings
-        jtestCWEConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/CWE Top 25 2024.properties" //builtin://CWE Top 25 2024
-        jtestOWASPConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/OWASP Top 10-2021.properties" //builtin://OWASP Top 10-2021
-        jtestOWASPAPIConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/OWASP API Security Top 10-2023.properties" //builtin://OWASP API Security Top 10-2023
-        jtestPCIConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/PCI DSS 4.0.properties" //builtin://PCI DSS 4.0
-        jtestHIPAAConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/HIPAA.properties" //builtin://HIPAA
-        jtestSTIGConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/DISA-ASD-STIG.properties" //builtin://DISA-ASD-STIG
-        jtestCERTConfig="file:///home/parasoft/jenkins/parabank-jenkins/jtest/configs/CERT for Java.properties" //builtin://CERT for Java
-        jtestSessionTag="ParabankJenkins-Jtest-Security"
+        jtestCWEConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/CWE Top 25 2024.properties" //builtin://CWE Top 25 2024
+        jtestOWASPConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/OWASP Top 10-2021.properties" //builtin://OWASP Top 10-2021
+        jtestOWASPAPIConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/OWASP API Security Top 10-2023.properties" //builtin://OWASP API Security Top 10-2023
+        jtestPCIConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/PCI DSS 4.0.properties" //builtin://PCI DSS 4.0
+        jtestHIPAAConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/HIPAA.properties" //builtin://HIPAA
+        jtestSTIGConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/DISA-ASD-STIG.properties" //builtin://DISA-ASD-STIG
+        jtestCERTConfig="file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/CERT for Java.properties" //builtin://CERT for Java
+        jtestSessionTag="demoAppJenkins-Jtest-Security"
 
         // Parasoft SOAtest Settings
         soatestConfig="soatest.user://Example Configuration"
-        soatestSessionTag="ParabankJenkins-SOAtest-Security"
-        soatestCovImage="Parabank_All;Parabank_SOAtest"
+        soatestSessionTag="demoAppJenkins-SOAtest-Security"
+        soatestCovImage="demoApp_All;demoApp_SOAtest"
     }
     stages {
         stage('Setup') {
@@ -288,17 +288,17 @@ pipeline {
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
                     --name jtest \
-                    -v "$PWD/parabank:/home/parasoft/jenkins/parabank" \
-                    -v "$PWD/parabank-jenkins:/home/parasoft/jenkins/parabank-jenkins" \
-                    -w "/home/parasoft/jenkins/parabank" \
+                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./parabank-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     mvn -ntp \
                     jtest:jtest \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../parabank-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestHIPAAConfig}' \
                     -Djtest.report=./target/jtest/sast/hipaa \
                     -Djtest.showSettings=true \
