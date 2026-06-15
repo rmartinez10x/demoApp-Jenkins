@@ -217,7 +217,7 @@ pipeline {
                             -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                             -DskipTests=true \
                             -Djtest.settings=../demoApp-jenkins/jtest/jtestcli.properties \
-                            -Djtest.config="${jtestCWEConfig}" \
+                            -Djtest.config="${file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/CWE Top 25 2024.properties}" \
                             -Djtest.report=./target/jtest/sa \
                             -Djtest.showSettings=true \
                             -Dproperty.report.dtp.publish=false \
