@@ -182,9 +182,9 @@ pipeline {
         stage('Jtest: (SAST) CWE Top 25') {
             when { equals expected: true, actual: true }
             steps {
-                // Execute the build with Jtest Maven plugin in docker
+                // Execute the build with Jtest Gradle plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -196,39 +196,39 @@ pipeline {
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
                     set -euxo pipefail
-echo "=== HOST DEBUG ==="
-pwd
-ls -la
-ls -la "$PWD/demoApp" || true
-ls -la "$PWD/demoApp-jenkins" || true
-id
-env | sort | egrep 'JAVA_HOME|WORKSPACE|BUILD_|JENKINS|HOME|PWD' || true
+                    echo "=== HOST DEBUG ==="
+                    pwd
+                    ls -la
+                    ls -la "$PWD/demoApp" || true
+                    ls -la "$PWD/demoApp-jenkins" || true
+                    id
+                    env | sort | egrep 'JAVA_HOME|WORKSPACE|BUILD_|JENKINS|HOME|PWD' || true
 
-IMG_ID=$(docker build --progress=plain --no-cache -q ./demoApp-jenkins/jtest)
-echo "Built image: $IMG_ID"
-docker image inspect "$IMG_ID" --format 'User={{.Config.User}} WorkDir={{.Config.WorkingDir}} Env={{json .Config.Env}}'
+                    IMG_ID=$(docker build --progress=plain --no-cache -q ./demoApp-jenkins/jtest)
+                    echo "Built image: $IMG_ID"
+                    docker image inspect "$IMG_ID" --format 'User={{.Config.User}} WorkDir={{.Config.WorkingDir}} Env={{json .Config.Env}}'
 
-docker run --rm -i \
-  -u ${jenkins_uid}:${jenkins_gid} \
-  -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
-  -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
-  -w /home/parasoft/jenkins/demoApp \
-  --entrypoint /bin/bash \
-  "$IMG_ID" -lc '
-    set -euxo pipefail
-    echo "=== CONTAINER DEBUG ==="
-    id
-    pwd
-    ls -la /
-    ls -la /home/parasoft
-    ls -la /home/parasoft/jenkins || true
-    ls -la /home/parasoft/jenkins/demoApp || true
-    file /home/parasoft/jenkins/demoApp || true
-    echo "JAVA_HOME=$JAVA_HOME"
-    which java || true
-    java -version || true
-    ./gradlew --version || true
-  '
+                    docker run --rm -i \
+                    -u ${jenkins_uid}:${jenkins_gid} \
+                    -v "$PWD/demoApp:/home/parasoft/jenkins/demoApp" \
+                    -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
+                    -w /home/parasoft/jenkins/demoApp \
+                    --entrypoint /bin/bash \
+                    "$IMG_ID" -lc '
+                        set -euxo pipefail
+                        echo "=== CONTAINER DEBUG ==="
+                        id
+                        pwd
+                        ls -la /
+                        ls -la /home/parasoft
+                        ls -la /home/parasoft/jenkins || true
+                        ls -la /home/parasoft/jenkins/demoApp || true
+                        file /home/parasoft/jenkins/demoApp || true
+                        echo "JAVA_HOME=$JAVA_HOME"
+                        which java || true
+                        java -version || true
+                        ./gradlew --version || true
+                    '
 
                     ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
@@ -246,9 +246,9 @@ docker run --rm -i \
         stage('Jtest: (SAST) OWASP Top 10') {
             when { equals expected: true, actual: true }
             steps {
-                // Execute the build with Jtest Maven plugin in docker
+                // Execute the build with Jtest Gradle plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -257,19 +257,9 @@ docker run --rm -i \
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn \
-                    jtest:jtest \
-                    -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestOWASPConfig}' \
-                    -Djtest.report=./target/jtest/sast/owasp \
-                    -Djtest.showSettings=true \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
-
-                    ./gradlew clean jtest \
+                    ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
@@ -285,9 +275,9 @@ docker run --rm -i \
         stage('Jtest: (SAST) PCI-DSS') {
             when { equals expected: true, actual: false }
             steps {
-                // Execute the build with Jtest Maven plugin in docker
+                // Execute the build with Jtest Gradle plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -296,10 +286,10 @@ docker run --rm -i \
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn \
-                    jtest:jtest \
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
@@ -315,9 +305,9 @@ docker run --rm -i \
         stage('Jtest: HIPAA') {
             when { equals expected: true, actual: false }
             steps {
-                // Execute the build with Jtest Maven plugin in docker
+                // Execute the build with Jtest Gradle plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -326,10 +316,10 @@ docker run --rm -i \
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn -ntp \
-                    jtest:jtest \
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
