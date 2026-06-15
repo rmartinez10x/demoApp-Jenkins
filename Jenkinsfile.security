@@ -200,6 +200,9 @@ pipeline {
                         id
                         env | sort | egrep "JAVA_HOME|WORKSPACE|BUILD_|JENKINS|HOME|PWD|GRADLE" || true
                         export HOME=/home/parasoft
+                        export JAVA_HOME=/home/parasoft/jdk-11.0.25+9
+                        export PATH=$JAVA_HOME/bin:$PATH
+                        java -version
                         mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
 
                         ./gradlew clean assemble jtest \
