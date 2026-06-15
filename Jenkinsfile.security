@@ -199,6 +199,7 @@ pipeline {
                     echo '=== CONTAINER DEBUG ==='
                     id
                     env | sort | egrep 'JAVA_HOME|WORKSPACE|BUILD_|JENKINS|HOME|PWD|GRADLE' || true
+                    export HOME=/home/parasoft
                     mkdir -p \$HOME \$GRADLE_USER_HOME
 
                     ./gradlew clean assemble jtest \
