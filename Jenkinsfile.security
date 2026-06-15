@@ -288,7 +288,7 @@ pipeline {
                     --network=demo-net \
                     $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    ./gradlew clean jtest \
+                    ./gradlew clean assemble jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -s /home/parasoft/.m2/settings.xml \
