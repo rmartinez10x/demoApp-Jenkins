@@ -205,6 +205,8 @@ pipeline {
                         java -version
                         ls -la /home/parasoft
                         mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
+                        mkdir -p demoApp/build demoApp/src/main/resources/META-INF
+                        chown -R 992:992 demoApp
 
                         ./gradlew clean jtest \
                         --no-daemon \
