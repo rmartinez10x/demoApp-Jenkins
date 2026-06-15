@@ -203,6 +203,7 @@ pipeline {
                         export JAVA_HOME=/home/parasoft/jdk-11.0.25+9
                         export PATH=$JAVA_HOME/bin:$PATH
                         java -version
+                        ls -la /home/parasoft
                         mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
 
                         ./gradlew clean assemble jtest \
