@@ -206,7 +206,7 @@ pipeline {
                         ls -la /home/parasoft
                         mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
 
-                        ./gradlew clean assemble jtest \
+                        ./gradlew clean jtest \
                         --no-daemon \
                         -g /home/parasoft/.gradle \
                         --project-cache-dir /home/parasoft/.gradle/project-cache \
