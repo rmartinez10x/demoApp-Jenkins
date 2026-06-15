@@ -200,11 +200,12 @@ pipeline {
                         id
                         env | sort | egrep "JAVA_HOME|WORKSPACE|BUILD_|JENKINS|HOME|PWD|GRADLE" || true
                         export HOME=/home/parasoft
-                        mkdir -p /home/parasoft/.gradle
+                        mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
 
                         ./gradlew clean assemble jtest \
-                            --no-daemon \
-                            -g /home/parasoft/.gradle \
+                        --no-daemon \
+                        -g /home/parasoft/.gradle \
+                        --project-cache-dir /home/parasoft/.gradle/project-cache \
                             -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                             -DskipTests=true \
                             -Djtest.settings=../demoApp-jenkins/jtest/jtestcli.properties \
