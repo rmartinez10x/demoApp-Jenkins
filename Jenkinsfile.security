@@ -18,8 +18,8 @@ pipeline {
         app_jms_port = 63616
 
         // Jenkins UID:GID
-        jenkins_uid = 992
-        jenkins_gid = 992
+        jenkins_uid = 991
+        jenkins_gid = 990
 
         nvd_key = "${NVD_APIKEY}" //nvd api key to speed up owasp dependency check
         ossIndexUsername = "${OSS_INDEX_USERNAME}" //Sonatype OSS Index Username *hint: email address
