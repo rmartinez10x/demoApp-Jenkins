@@ -204,9 +204,11 @@ pipeline {
                         export PATH=$JAVA_HOME/bin:$PATH
                         java -version
                         ls -la /home/parasoft
+                        ls -la /home/parasoft/jenkins
+                        ls -la /home/parasoft/jenkins/demoApp || true
                         mkdir -p /home/parasoft/.gradle /home/parasoft/.gradle/project-cache
-                        mkdir -p build src/main/resources/META-INF
-                        chown -R 992:992 demoApp
+                        mkdir -p /home/parasoft/jenkins/demoApp/build \
+                                 /home/parasoft/jenkins/demoApp/src/main/resources/META-INF
 
                         ./gradlew clean jtest \
                         --no-daemon \
