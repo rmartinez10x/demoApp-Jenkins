@@ -200,7 +200,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://CWE Top 25 2024' \
+                    -Djtest.config='${jtestCWEConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
