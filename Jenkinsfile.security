@@ -252,7 +252,7 @@ pipeline {
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
-                    -Dproperty.report.dtp.publish=${dtp_publish};
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
             }
@@ -271,16 +271,19 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    ./gradlew clean assemble jtest \
+                    pwd; \
+                    ls -ld; \
+
+                    ./gradlew clean jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestPCIConfig}' \
-                    -Djtest.report=./target/jtest/sast/pci \
+                    -Djtest.config='builtin://PCI DSS 4.0' \
+                    -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
+                    --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
@@ -301,16 +304,19 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+
+                    pwd; \
+                    ls -ld; \
 
                     ./gradlew clean jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestHIPAAConfig}' \
-                    -Djtest.report=./target/jtest/sast/hipaa \
+                    -Djtest.config='builtin://HIPAA' \
+                    -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
+                    --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
@@ -333,14 +339,17 @@ pipeline {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn \
-                    jtest:jtest \
+                    pwd; \
+                    ls -ld; \
+
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestSTIGConfig}' \
-                    -Djtest.report=./target/jtest/sast/stig \
+                    -Djtest.config='builtin://DISA-ASD-STIG' \
+                    -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
+                    --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
@@ -360,16 +369,19 @@ pipeline {
                     -v "$PWD/demoApp-jenkins:/home/parasoft/jenkins/demoApp-jenkins" \
                     -w "/home/parasoft/jenkins/demoApp" \
                     --network=demo-net \
-                    $(docker build -q ./demoApp-jenkins/jtest) /bin/bash -c " \
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn \
-                    jtest:jtest \
+                    pwd; \
+                    ls -ld; \
+
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -s /home/parasoft/.m2/settings.xml \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='${jtestCERTConfig}' \
-                    -Djtest.report=./target/jtest/sast/cert \
+                    -Djtest.config='builtin://CERT for Java' \
+                    -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
+                    --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
@@ -407,13 +419,18 @@ pipeline {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    java -version \
+                    pwd; \
+                    ls -ld; \
 
-                    mvn \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -P owasp-dependency-check org.owasp:dependency-check-maven:10.0.2:check \
-                    -Dodc.outputDirectory=./target/owasp-dependency-check \
-                    -DnvdApiKey=${nvd_key} \
+                    ./gradlew clean jtest \
+                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    -DskipTests=true \
+                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
+                    -Djtest.config='builtin://CERT for Java' \
+                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.showSettings=true \
+                    --stacktrace --debug \
+                    -Dproperty.report.dtp.publish=${dtp_publish}; \
                     "
                     '''
                 // Run Parasoft OWASP Dependency Check Pack directly on VM
