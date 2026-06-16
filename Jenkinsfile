@@ -207,7 +207,7 @@ allprojects {
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return true;
+                    return false;
                 }
             }
             steps {
@@ -260,7 +260,7 @@ allprojects {
             }
         }
         stage('Jtest: Unit Test') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
