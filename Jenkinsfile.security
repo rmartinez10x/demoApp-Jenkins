@@ -183,8 +183,6 @@ pipeline {
             when { equals expected: true, actual: true }
             steps {
                 sh '''
-                
-
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -207,7 +205,7 @@ pipeline {
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
-                    '
+                    "
                 '''
     }
 }
