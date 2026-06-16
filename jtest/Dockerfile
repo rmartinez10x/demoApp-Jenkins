@@ -20,7 +20,7 @@ ARG JDK11_VERSION=jdk-11.0.25+9
 
 
 
-ENV JAVA_HOME=${USER_HOME_DIR}/${JDK_VERSION}
+ENV JAVA_HOME=${USER_HOME_DIR}/${JDK11_VERSION}
 
 # Download Java 17
 #RUN wget https://aka.ms/download-jdk/microsoft-jdk-17.0.14-linux-x64.tar.gz \
