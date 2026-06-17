@@ -405,6 +405,8 @@ pipeline {
                     pwd; \
                     ls -ld; \
 
+                    ./gradlew tasks --all | grep -i dependencyCheck \
+
                     ./gradlew clean dependencyCheckAnalyze jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
