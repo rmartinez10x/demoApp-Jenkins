@@ -231,7 +231,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://OWASP Top 10-2021' \
+                    -Djtest.config='${jtestOWASPConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
@@ -263,7 +263,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://PCI DSS 4.0' \
+                    -Djtest.config='${jtestPCIConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
@@ -296,7 +296,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://HIPAA' \
+                    -Djtest.config='${jtestHIPAAConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
@@ -329,7 +329,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://DISA-ASD-STIG' \
+                    -Djtest.config='${jtestDISAConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
@@ -361,7 +361,7 @@ pipeline {
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://CERT for Java' \
+                    -Djtest.config='${jtestCERTConfig}' \
                     -Djtest.report=./target/jtest/sa \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
@@ -387,7 +387,7 @@ pipeline {
             }
         }
         stage('Parasoft: (SCA) OWASP Dependency Check') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
@@ -405,20 +405,18 @@ pipeline {
                     pwd; \
                     ls -ld; \
 
-                    ./gradlew clean jtest \
+                    ./gradlew clean dependencyCheckAnalyze jtest \
                     -I /opt/parasoft/jtest/integration/gradle/init.gradle \
                     -DskipTests=true \
-                    -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
-                    -Djtest.config='builtin://CERT for Java' \
-                    -Djtest.report=./target/jtest/sa \
-                    -Djtest.showSettings=true \
-                    --stacktrace --debug \
-                    -Dproperty.report.dtp.publish=${dtp_publish}; \
+                    -Dodc.outputDirectory=./target/owasp-dependency-check \
+                    -DnvdApiKey=${nvd_key} \
+                    -DossIndexUsername=${ossIndexUsername} \
+                    -DossIndexPassword=${ossIndexPassword} \
                     "
                     '''
                 // Run Parasoft OWASP Dependency Check Pack directly on VM
                 sh '''
-                    ./demoApp-jenkins/jtest/dependency-check-pack-2024.1.0/dependencycheck.sh \
+                    ./demoApp-jenkins/jtest/dependency-check-pack-2025.2.0/dependencycheck.sh \
                         -results.file ./demoApp/target/dependency-check-report.xml
                     '''
             }
