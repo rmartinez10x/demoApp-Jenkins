@@ -1,0 +1,69 @@
+/*
+ * This initscript is an ALTERNATIVE to jtest.gradle script.
+ * 
+ * Apply it into a build by a cmdline "-I" argument:
+ * 
+ * $ gradle jtest -I PATH/TO/JTEST/integration/gradle/init.gradle -Djtest.home=PATH/TO/JTEST
+ * 
+ * (if initscript has been copied from its original location additional property 'jtest.home' is required)
+ * $ gradle jtest -I init.gradle -Djtest.home=PATH/TO/JTEST
+ *
+ * Note that Java system properties will not work in "initscript" block in case of Gradle version 2.0 and lower.
+ * In such case you need to define JTEST_HOME environment variable (and do not need to specify "jtest.home" Java system variable anymore).
+ */
+initscript {
+    def home = System.properties['jtest.home']
+    if (home == null) {
+        println 'No jtest.home system property.'
+        home = System.getenv('JTEST_HOME')
+        if (home == null) {
+            println 'No JTEST_HOME environment variable.'
+            def scriptPath = buildscript.sourceFile.absolutePath
+            def scriptRelativePath = File.separator + 'integration' + File.separator + 'gradle' + File.separator + 'init.gradle'
+            if (scriptPath.contains(scriptRelativePath)) {
+                home = scriptPath.substring(0, scriptPath.indexOf(scriptRelativePath))
+                println 'Setting up system property jtest.home=' + home
+                System.setProperty('jtest.home', home)
+            } else {
+                println 'FAILED to locate Jtest installation directory'
+                println 'Define "jtest.home" system property, "JTEST_HOME" environment variable, '
+                println 'or use initscript PATH/TO/JTEST/integration/gradle/init.gradle.'
+            }
+        } else {
+            println 'Using environment property JTEST_HOME=' + home
+            System.setProperty('jtest.home', home)
+        }
+    } else {
+        println 'Using system property jtest.home=' + home
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url = file(home + '/integration/maven')
+        }
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'com.parasoft.jtest:jtest-gradle-plugin:2026.1.0'
+        classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2026.1.0'
+		classpath 'org.owasp:dependency-check-gradle:12.2.2'
+    }
+}
+rootProject {
+    apply plugin: com.parasoft.jtest.plugin.gradle.JtestPlugin
+	apply plugin: org.owasp.dependencycheck.gradle.DependencyCheckPlugin
+	
+	dependencyCheck {
+        format = 'ALL'
+        scanSet = ['.']
+        if (System.getenv('NVD_APIKEY')) {
+            nvd.apiKey = System.getenv('NVD_APIKEY')
+        }
+    }
+}
+
+allprojects {
+    apply plugin: com.parasoft.jtest.tia.ci.gradle.TIAPlugin
+}

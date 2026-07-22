@@ -45,6 +45,8 @@ pipeline {
         jtestHIPAAConfig = 'file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/HIPAA.properties' //builtin://HIPAA
         jtestSTIGConfig = 'file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/DISA-ASD-STIG.properties' //builtin://DISA-ASD-STIG
         jtestCERTConfig = 'file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/CERT for Java.properties' //builtin://CERT for Java
+        jtestGradleInit = 'file:///home/parasoft/jenkins/demoApp-jenkins/jtest/configs/init.gradle' //builtin://CERT for Java
+
         jtestSessionTag = 'demoAppJenkins-Jtest-Security'
 
         // Parasoft SOAtest Settings
@@ -387,11 +389,11 @@ pipeline {
             }
         }
         stage('Parasoft: (SCA) OWASP Dependency Check') {
-            when { equals expected: true, actual: true }
+            when { equals expected: true, actual: false }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -405,15 +407,13 @@ pipeline {
                     pwd; \
                     ls -ld; \
 
-                    ./gradlew tasks --all | grep -i dependencyCheck \
-
                     ./gradlew clean dependencyCheckAnalyze jtest \
-                    -I /opt/parasoft/jtest/integration/gradle/init.gradle \
+                    -I ${jtestGradleInit} \
                     -DskipTests=true \
                     -Dodc.outputDirectory=./target/owasp-dependency-check \
-                    -DnvdApiKey=${nvd_key} \
-                    -DossIndexUsername=${ossIndexUsername} \
-                    -DossIndexPassword=${ossIndexPassword} \
+                    -Dnvd.api.key=${nvd_key} \
+                    -Danalyzer.ossindex.user=${ossIndexUsername} \
+                    -Danalyzer.ossindex.password=${ossIndexPassword} \
                     "
                     '''
                 // Run Parasoft OWASP Dependency Check Pack directly on VM
@@ -424,7 +424,7 @@ pipeline {
             }
         }
         stage('Jtest: Package-CodeCoverage') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Setup stage-specific additional settings
                 sh '''
@@ -433,9 +433,9 @@ pipeline {
                     report.coverage.images=${soatestCovImage}
                     " > ./demoApp-jenkins/jtest/jtestcli-ft.properties
                 '''
-                // Package the application with the Jtest Monitor
+                // Execute the build with Jtest Maven plugin in docker
                 sh '''
-                    # Run Maven build with Jtest tasks via Docker
+                    # Run Gradle build with Jtest tasks via Docker
                     docker run \
                     -u ${jenkins_uid}:${jenkins_gid} \
                     --rm -i \
@@ -446,33 +446,35 @@ pipeline {
                     --network=demo-net \
                     $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/jtest) /bin/bash -c " \
 
-                    mvn package jtest:monitor \
-                    -s /home/parasoft/.m2/settings.xml \
-                    -Dmaven.test.skip=true \
+                    #Gradle execution
+                    ./gradlew jtest-monitor \
+                    -I '../demoApp-jenkins/jtest/init.gradle' \
+                    -Djtest.home=/opt/parasoft/jtest \
+                    -DskipTests=true \
                     -Djtest.settingsList='../demoApp-jenkins/jtest/jtestcli.properties,../demoApp-jenkins/jtest/jtestcli-ft.properties' \
                     -Djtest.showSettings=true \
+                    --stacktrace --continue -Dorg.gradle.execution.failure.ignore=true \
+                    -Dproperty.report.dtp.publish=${dtp_publish};
                     "
-                    '''
 
-                // Unzip the monitor package in preparation for mounting with deployment
-                sh '''
-                    # check demoApp/target permissions
-                    #ls -la ./demoApp/target
+                    # check demoApp/build permissions
+                    #ls -la ./demoApp/build
 
                     # Unzip monitor.zip
                     mkdir monitor
-                    unzip -q ./demoApp/target/jtest/monitor/monitor.zip -d .
+                    unzip -q ./demoApp/build/jtest/monitor.zip -d .
                     #ls -ll
                     #ls -la monitor
                     '''
+                    archiveArtifacts artifacts: '**/demoApp/build/jtest/monitor.zip', allowEmptyArchive: true
             }
         }
         stage('Jtest: Deploy-CodeCoverage') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // deploy the project
                 sh  '''
-                    # Run demoApp-baseline docker image with Jtest coverage agent configured
+                # Run demoApp-baseline docker image with Jtest coverage agent configured
                     docker run \
                     -d \
                     -u ${jenkins_uid}:${jenkins_gid} \
@@ -484,13 +486,40 @@ pipeline {
                     -v "$PWD/monitor:/home/docker/jtest/monitor" \
                     --network=demo-net \
                     --name ${app_name} \
-                    $(docker build -q ./demoApp-jenkins/demoApp-docker)
+                    $(docker build --build-arg HOST_UID="$jenkins_uid" --build-arg HOST_GID="$jenkins_gid" -q ./demoApp-jenkins/demoApp-docker)
+
+                    # Health Check — wait for application readiness
+                    echo "Waiting for application to become available..."
+
+                    echo "Ports inside container:"
+                    docker exec ${app_name} ss -lnt || true
+
+                    app_ready=false
+
+                    for i in {1..60}; do
+                    if curl -sf http://localhost:${app_port}/loginPage > /dev/null; then
+                        echo "Application is up!"
+                        app_ready=true
+                        break
+                    fi
+                    echo "Not ready yet... retrying ($i)"
+                    sleep 5
+                    done
+
+                    if [ "$app_ready" != "true" ]; then
+                    echo "ERROR: Application failed to start within expected time"
+                    docker logs ${app_name} || true
+                    exit 1
+                    fi
+
 
                     # Health Check
-                    sleep 15
                     docker ps -f name=${app_name}
-                    curl -iv --raw http://localhost:${app_port}/demoApp
+                    curl -iv --raw http://localhost:${app_port}/loginPage
                     curl -iv --raw http://localhost:${app_cov_port}/status
+                    
+                    echo "Container logs:"
+                    docker logs ${app_name} || true
                     '''
             }
         }
