@@ -1,30 +1,32 @@
-# baseline image
-FROM parasoft/soavirt:2024.2
+# Base image
+FROM parasoft/soavirt:2025.3
 
+# Host UID/GID mapping for Jenkins
 ARG HOST_UID=992
 ARG HOST_GID=992
-
-# Setup parasoft user
-USER root
 ARG USER_HOME_DIR=/usr/local/parasoft
 
+# Switch to root to configure user and install packages
+USER root
+
+# Setup parasoft user with proper UID/GID
 RUN rm -f /var/log/lastlog /var/log/faillog \
     && ln -s /dev/null /var/log/lastlog \
     && ln -s /dev/null /var/log/faillog \
     && groupmod -g ${HOST_GID} parasoft \
     && usermod -u ${HOST_UID} -g ${HOST_GID} parasoft
 
-## Fix permissions
+# Fix permissions
 RUN chown -h -R ${HOST_UID}:${HOST_GID} ${USER_HOME_DIR}
 RUN chmod +x ${USER_HOME_DIR}/soavirt/entrypoint.sh
 
-RUN touch /var/log/lastlog && \
-    touch /var/log/faillog
+# Ensure log files exist
+RUN touch /var/log/lastlog && touch /var/log/faillog
 
 # Setup Chrome web driver for Web UI tests
 RUN rpm -ivh \
-        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-9.0-24.el9.noarch.rpm \
-        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-9.0-24.el9.noarch.rpm && \
+        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-9.0-34.el9.noarch.rpm \
+        https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-9.0-34.el9.noarch.rpm && \
     dnf install -y --nodocs --repo baseos --repo appstream \
         liberation-fonts \
         vulkan-loader \
@@ -39,7 +41,9 @@ RUN rpm -ivh \
     dnf clean all && \
     rm -rf /var/cache/dnf \
     dnf install nss-tools
+
+# Switch back to parasoft user
 USER parasoft
 
-# Define working directory.
+# Set working directory
 WORKDIR ${USER_HOME_DIR}

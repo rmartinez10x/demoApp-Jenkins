@@ -1,19 +1,31 @@
 # baseline image
-FROM parasoft/jtest:2024.2
+FROM parasoft/jtest:2025.2
 
-ARG HOST_UID=995
-ARG HOST_GID=991
+#ARG HOST_UID=995
+#ARG HOST_GID=991
+
+ARG HOST_UID=992
+ARG HOST_GID=992
 
 ## Permissions to create dirs
 USER root
 ARG USER_HOME_DIR=/home/parasoft
 
 # Install JDK 17
-ARG JAVA_VER=11
-ARG JDK_VERSION=jdk-11.0.25+9
-ENV JAVA_HOME=${USER_HOME_DIR}/${JDK_VERSION}
+#ARG JAVA_VER=17
+#ARG JDK_VERSION=jdk-17.0.14+7
+
+ARG USER_HOME_DIR=/home/parasoft
+ARG JDK11_VERSION=jdk-11.0.25+9
+
+
+
+ENV JAVA_HOME=${USER_HOME_DIR}/${JDK11_VERSION}
 
 # Download Java 17
+#RUN wget https://aka.ms/download-jdk/microsoft-jdk-17.0.14-linux-x64.tar.gz \
+#    && tar xvzf microsoft-jdk-17.0.14-linux-x64.tar.gz -C ${USER_HOME_DIR}
+
 RUN wget https://aka.ms/download-jdk/microsoft-jdk-11.0.25-linux-x64.tar.gz \
     && tar xvzf microsoft-jdk-11.0.25-linux-x64.tar.gz -C ${USER_HOME_DIR}
 
