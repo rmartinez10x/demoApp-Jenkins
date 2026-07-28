@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'maven'
+        maven 'gradle'
         jdk 'JDK 17'
     }
     environment {
@@ -179,7 +179,7 @@ pipeline {
     repositories {
         mavenCentral()
         maven {
-            url file(home + '/integration/maven')
+            url file(home + '/integration/gradle')
         }
     }
     dependencies {
