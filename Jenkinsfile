@@ -1,7 +1,7 @@
 pipeline {
     agent any
     tools {
-        maven 'gradle'
+        maven 'maven'
         jdk 'JDK 17'
     }
     environment {
@@ -149,56 +149,39 @@ pipeline {
                     '''
                     
                     sh  '''
-                    # Set Up and write .properties file
-                    echo $"
-                    initscript {
-    def home = System.properties['jtest.home']
-    if (home == null) {
-        println 'No jtest.home system property.'
-        home = System.getenv('JTEST_HOME')
-        if (home == null) {
-            println 'No JTEST_HOME environment variable.'
-            def scriptPath = buildscript.sourceFile.absolutePath
-            def scriptRelativePath = File.separator + 'integration' + File.separator + 'gradle' + File.separator + 'init.gradle'
-            if (scriptPath.contains(scriptRelativePath)) {
-                home = scriptPath.substring(0, scriptPath.indexOf(scriptRelativePath))
-                println 'Setting up system property jtest.home=' + home
-                System.setProperty('jtest.home', home)
-            } else {
-                println 'FAILED to locate Jtest installation directory'
-                println 'Define "jtest.home" system property, "JTEST_HOME" environment variable, '
-                println 'or use initscript PATH/TO/JTEST/integration/gradle/init.gradle.'
-            }
-        } else {
-            println 'Using environment property JTEST_HOME=' + home
-            System.setProperty('jtest.home', home)
-        }
-    } else {
-        println 'Using system property jtest.home=' + home
-    }
+                    # Generate init.gradle using the plugin version that matches the installed Jtest,
+                    # avoiding hardcoded version mismatches. The version is read dynamically from
+                    # the Jtest local maven repo inside the Docker image.
+                    cat > ./demoApp-jenkins/jtest/init.gradle << '\''INIT_GRADLE'\''
+initscript {
+    def home = System.properties['jtest.home'] ?: System.getenv('JTEST_HOME') ?: '/opt/parasoft/jtest'
+    System.setProperty('jtest.home', home)
+    println 'Using jtest.home=' + home
+
+    // Detect the installed plugin version from the local maven repo directory
+    def pluginDir = new File(home + '/integration/maven/com/parasoft/jtest/jtest-gradle-plugin')
+    def version = pluginDir.listFiles()?.findAll { it.isDirectory() }?.collect { it.name }?.sort()?.last()
+    if (!version) throw new GradleException("Could not detect jtest-gradle-plugin version in ${pluginDir}")
+    println 'Detected jtest-gradle-plugin version: ' + version
+
     repositories {
-        mavenCentral()
-        maven {
-            url file(home + '/integration/gradle')
-        }
+        maven { url = file(home + '/integration/maven') }
     }
     dependencies {
-        classpath 'com.parasoft.jtest:jtest-gradle-plugin:2025.2.5'
-        classpath 'com.parasoft.jtest.tia:tia-gradle-plugin:2025.2.5'
+        classpath "com.parasoft.jtest:jtest-gradle-plugin:${version}"
+        classpath "com.parasoft.jtest.tia:tia-gradle-plugin:${version}"
     }
 }
 rootProject {
     apply plugin: com.parasoft.jtest.plugin.gradle.JtestPlugin
 }
-
 allprojects {
     apply plugin: com.parasoft.jtest.tia.ci.gradle.TIAPlugin
     tasks.withType(Test).configureEach {
         ignoreFailures = true
     }
 }
-
-                    " > ./demoApp-jenkins/jtest/init.gradle
+INIT_GRADLE
                     '''
 
 
@@ -207,7 +190,7 @@ allprojects {
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return false;
+                    return true;
                 }
             }
             steps {
