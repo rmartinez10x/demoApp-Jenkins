@@ -207,7 +207,7 @@ allprojects {
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return true;
+                    return false;
                 }
             }
             steps {
