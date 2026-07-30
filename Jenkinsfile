@@ -190,7 +190,7 @@ INIT_GRADLE
         stage('Jtest: Quality Scan') {
             when {
                 expression {
-                    return false;
+                    return true;
                 }
             }
             steps {
