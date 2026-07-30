@@ -212,7 +212,7 @@ pipeline {
     }
 }
         stage('Jtest: (SAST) OWASP Top 10') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Gradle plugin in docker
                 sh '''
@@ -243,7 +243,7 @@ pipeline {
             }
         }
         stage('Jtest: (SAST) PCI-DSS') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Gradle plugin in docker
                 sh '''
@@ -276,7 +276,7 @@ pipeline {
         }
 
         stage('Jtest: HIPAA') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Gradle plugin in docker
                 sh '''
@@ -309,7 +309,7 @@ pipeline {
         }
 
         stage('Jtest: (SAST) DISA ASD-STIG') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
@@ -341,7 +341,7 @@ pipeline {
             }
         }
         stage('Jtest: (SAST) CERT for Java') {
-            when { equals expected: true, actual: false }
+            when { equals expected: true, actual: true }
             steps {
                 // Execute the build with Jtest Maven plugin in docker
                 sh '''
