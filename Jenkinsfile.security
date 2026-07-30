@@ -8,7 +8,7 @@ pipeline {
         JAVA_HOME = "${tool 'JDK 17'}"
 
         // App Settings
-        project_name = 'demoApp-Jenkins' //DTP Project
+        project_name = 'demoApp-Jenkins_Security' //DTP Project
         app_name = 'demoApp-baseline' //docker container
         image = 'parasoft/demoApp:baseline' //docker image
         app_short = 'DA' //demoApp
