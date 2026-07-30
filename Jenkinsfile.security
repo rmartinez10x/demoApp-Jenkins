@@ -203,7 +203,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestCWEConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
@@ -234,7 +234,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestOWASPConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
@@ -266,7 +266,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestPCIConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
@@ -299,7 +299,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestHIPAAConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
@@ -332,7 +332,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestDISAConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
@@ -364,7 +364,7 @@ pipeline {
                     -DskipTests=true \
                     -Djtest.settings='../demoApp-jenkins/jtest/jtestcli.properties' \
                     -Djtest.config='${jtestCERTConfig}' \
-                    -Djtest.report=./target/jtest/sa \
+                    -Djtest.report=./target/jtest/sast \
                     -Djtest.showSettings=true \
                     --stacktrace --debug \
                     -Dproperty.report.dtp.publish=${dtp_publish}; \
